@@ -10,7 +10,6 @@
 #include "game_cl_base.h"
 #include "../xrEngine/igame_persistent.h"
 
-
 #include "InventoryOwner.h"
 #include "relation_registry.h"
 #include "character_info.h"
@@ -23,11 +22,11 @@
 
 #include "../Include/xrRender/UIRender.h"
 
+#include <ai/monsters/poltergeist/poltergeist.h>
 
 u32 C_ON_ENEMY		D3DCOLOR_RGBA(0xff,0,0,0x80);
 u32 C_ON_NEUTRAL	D3DCOLOR_RGBA(0xff,0xff,0x80,0x80);
 u32 C_ON_FRIEND		D3DCOLOR_RGBA(0,0xff,0,0x80);
-
 
 #define C_DEFAULT	D3DCOLOR_RGBA(0xff,0xff,0xff,0x80)
 #define C_SIZE		0.025f
@@ -36,17 +35,23 @@ u32 C_ON_FRIEND		D3DCOLOR_RGBA(0,0xff,0,0x80);
 #define SHOW_INFO_SPEED		0.5f
 #define HIDE_INFO_SPEED		10.f
 
-
-IC	float	recon_mindist	()		{
+IC	float	recon_mindist	()		
+{
 	return 2.f;
 }
-IC	float	recon_maxdist	()		{
+
+IC	float	recon_maxdist	()		
+{
 	return 50.f;
 }
-IC	float	recon_minspeed	()		{
+
+IC	float	recon_minspeed	()		
+{
 	return 0.5f;
 }
-IC	float	recon_maxspeed	()		{
+
+IC	float	recon_maxspeed	()		
+{
 	return 10.f;
 }
 
@@ -63,9 +68,7 @@ CHUDTarget::CHUDTarget	()
 }
 
 CHUDTarget::~CHUDTarget	()
-{
-}
-
+{}
 
 void CHUDTarget::Load		()
 {
@@ -76,19 +79,19 @@ void CHUDTarget::ShowCrosshair(bool b)
 {
 	m_bShowCrosshair = b;
 }
-//. fVisTransparencyFactor
+
 float fCurrentPickPower;
 ICF static BOOL pick_trace_callback(collide::rq_result& result, LPVOID params)
 {
 	SPickParam*	pp			= (SPickParam*)params;
-//	collide::rq_result* RQ	= pp->RQ;
 	++pp->pass;
 
 	if(result.O)
 	{	
 		pp->RQ				= result;
 		return FALSE;
-	}else
+	}
+	else
 	{
 		//получить треугольник и узнать его материал
 		CDB::TRI* T		= Level().ObjectSpace.GetStaticTris()+result.element;
@@ -99,8 +102,6 @@ ICF static BOOL pick_trace_callback(collide::rq_result& result, LPVOID params)
 		{
 			return TRUE;
 		}
-//.		if (mtl->Flags.is(SGameMtl::flPassable)) 
-//.			return TRUE;
 	}
 	pp->RQ					= result;
 	return					FALSE;
@@ -161,10 +162,8 @@ void CHUDTarget::Render()
 	Fvector4			pt;
 	Device.mFullTransform.transform(pt, p2);
 	pt.y = -pt.y;
-	//PT.transform		(p2,Device.mFullTransform);
-	//float				di_size = C_SIZE/powf(PT.p.w,.2f);
-	float				di_size = C_SIZE/powf(pt.w,.2f);
 
+	float				di_size = C_SIZE/powf(pt.w,.2f);
 	CGameFont* F		= HUD().Font().pFontGraffiti19Russian;
 	F->SetAligment		(CGameFont::alCenter);
 	F->OutSetI			(0.f,0.05f);
@@ -174,7 +173,9 @@ void CHUDTarget::Render()
 
 	if (psHUD_Flags.test(HUD_INFO))
 	{ 
-		if(PP.RQ.O && PP.RQ.O->getVisible())
+		bool const is_poltergeist = PP.RQ.O && !!smart_cast<CPoltergeist*> (PP.RQ.O);
+		
+		if (PP.RQ.O && PP.RQ.O->getVisible() || is_poltergeist)
 		{
 			CEntityAlive*	E		= smart_cast<CEntityAlive*>	(PP.RQ.O);
 			CEntityAlive*	pCurEnt = smart_cast<CEntityAlive*>	(Level().CurrentEntity());
@@ -182,29 +183,36 @@ void CHUDTarget::Render()
 
 			if (IsGameTypeSingle())
 			{
-				CInventoryOwner* our_inv_owner		= smart_cast<CInventoryOwner*>(pCurEnt);
-				if (E && E->g_Alive() && !E->cast_base_monster())
+				CInventoryOwner* our_inv_owner = smart_cast<CInventoryOwner*>(pCurEnt);
+				if (E && E->g_Alive() && E->cast_base_monster())
+				{
+					C = C_ON_ENEMY;
+				}
+				else if (E && E->g_Alive() && !E->cast_base_monster())
 				{
 					CInventoryOwner* others_inv_owner	= smart_cast<CInventoryOwner*>(E);
 
-					if(our_inv_owner && others_inv_owner){
-
+					if (our_inv_owner && others_inv_owner)
+					{
 						switch(RELATION_REGISTRY().GetRelationType(others_inv_owner, our_inv_owner))
 						{
 						case ALife::eRelationTypeEnemy:
-							C = C_ON_ENEMY; break;
+							C = C_ON_ENEMY;
+							break;
 						case ALife::eRelationTypeNeutral:
-							C = C_ON_NEUTRAL; break;
+							C = C_ON_NEUTRAL;
+							break;
 						case ALife::eRelationTypeFriend:
-							C = C_ON_FRIEND; break;
+							C = C_ON_FRIEND;
+							break;
 						}
 
-						if (fuzzyShowInfo>0.5f)
+						if (fuzzyShowInfo > 0.5f)
 						{
-							CStringTable	strtbl		;
-							F->SetColor	(subst_alpha(C,u8(iFloor(255.f*(fuzzyShowInfo-0.5f)*2.f))));
-							F->OutNext	("%s", *strtbl.translate(others_inv_owner->Name()) );
-							F->OutNext	("%s", *strtbl.translate(others_inv_owner->CharacterInfo().Community().id()) );
+							CStringTable strtbl;
+							F->SetColor(subst_alpha(C, u8(iFloor(255.f * (fuzzyShowInfo - 0.5f) * 2.f))));
+							F->OutNext("%s", *strtbl.translate(others_inv_owner->Name()));
+							F->OutNext("%s", *strtbl.translate(others_inv_owner->CharacterInfo().Community().id()));
 						}
 					}
 
@@ -238,7 +246,9 @@ void CHUDTarget::Render()
 							float ddist = (PP.RQ.range - recon_mindist())/(recon_maxdist() - recon_mindist());
 							float dspeed = recon_minspeed() + (recon_maxspeed() - recon_minspeed())*ddist;
 							fuzzyShowInfo += Device.fTimeDelta/dspeed;
-						}else{
+						}
+						else
+						{
 							if (PP.RQ.range < recon_mindist()) 
 								fuzzyShowInfo += recon_minspeed()*Device.fTimeDelta;
 							else 
@@ -256,8 +266,9 @@ void CHUDTarget::Render()
 					}
 				};
 			};
-
-		}else{
+		}
+		else
+		{
 			fuzzyShowInfo -= HIDE_INFO_SPEED*Device.fTimeDelta;
 		}
 		clamp(fuzzyShowInfo,0.f,1.f);
@@ -273,7 +284,6 @@ void CHUDTarget::Render()
 	//отрендерить кружочек или крестик
 	if(!m_bShowCrosshair)
 	{
-		
 		UIRender->StartPrimitive	(6, IUIRender::ptTriList, UI()->m_currentPointType);
 		
 		Fvector2		scr_size;
@@ -303,8 +313,9 @@ void CHUDTarget::Render()
 		// unlock VB and Render it as triangle LIST
 		UIRender->SetShader(*hShader);
 		UIRender->FlushPrimitive();
-
-	}else{
+	}
+	else
+	{
 		//отрендерить прицел
 		HUDCrosshair.cross_color	= C;
 		HUDCrosshair.OnRender		();
