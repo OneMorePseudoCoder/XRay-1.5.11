@@ -1,23 +1,21 @@
 #include "stdafx.h"
-
-
 #include "ResourceManager.h"
 #include "R_DStreams.h"
-
 #include "../xrRender/dxRenderDeviceRender.h"
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-int		rsDVB_Size			= 4096;
-int		rsDIB_Size			= 512;
+int rsDVB_Size = 4096;
+int rsDIB_Size = 512;
 
-void _VertexStream::Create	()
+void _VertexStream::Create()
 {
-	//dxRenderDeviceRender::Instance().Resources->Evict		();
 	DEV->Evict();
 
-	mSize					= rsDVB_Size*1024;
+	mSize = rsDVB_Size * 1024;
+
 #ifdef	USE_DX10
 	D3D10_BUFFER_DESC bufferDesc;
 	bufferDesc.ByteWidth        = mSize;
@@ -224,8 +222,8 @@ void	_IndexStream::reset_begin	()
 	old_pIB				= pIB;
 	Destroy				();
 }
+
 void	_IndexStream::reset_end	()
 {
 	Create				();
-	//old_pIB				= NULL;
 }
