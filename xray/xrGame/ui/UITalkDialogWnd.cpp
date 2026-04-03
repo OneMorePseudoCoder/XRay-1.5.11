@@ -90,7 +90,7 @@ void CUITalkDialogWnd::InitTalkDialogWnd()
 	AddCallback("question_item", LIST_ITEM_CLICKED, CUIWndCallback::void_function(this, &CUITalkDialogWnd::OnQuestionClicked));
 	AddCallback("trade_btn", BUTTON_CLICKED, CUIWndCallback::void_function(this, &CUITalkDialogWnd::OnTradeClicked));
 	AddCallback("upgrade_btn", BUTTON_CLICKED, CUIWndCallback::void_function(this, &CUITalkDialogWnd::OnUpgradeClicked));
-	AddCallback("exit_btn" ,BUTTON_CLICKED, CUIWndCallback::void_function(this, &CUITalkDialogWnd::OnExitClicked));
+	AddCallback("exit_btn", BUTTON_CLICKED, CUIWndCallback::void_function(this, &CUITalkDialogWnd::OnExitClicked));
 }
 
 #include "UIInventoryUtilities.h"
@@ -173,6 +173,12 @@ void CUITalkDialogWnd::AddQuestion(LPCSTR str, LPCSTR value, int number)
 		string16 buff;
 		sprintf_s(buff, "%d.", number);
 		itm->m_num_text->SetText(buff);
+	}
+	else
+	{
+        string1024 buff;
+        snprintf(buff, sizeof(buff), "%d. %s", number, str);
+		str = buff;
 	}
     itm->Init(value, str);
 	if (number <= 10)
