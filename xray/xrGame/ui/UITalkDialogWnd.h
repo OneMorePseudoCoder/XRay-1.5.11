@@ -1,15 +1,10 @@
 #pragma once
-
-
 #include "UIStatic.h"
 #include "UI3tButton.h"
 #include "UIFrameLineWnd.h"
-
 #include "../InfoPortion.h"
-
 #include "UICharacterInfo.h"
 #include "UIItemInfo.h"
-
 #include "UIWndCallback.h"
 
 class CUIScrollView;
@@ -20,10 +15,10 @@ class CUITalkDialogWnd: public CUIWindow, public CUIWndCallback
 {
 private:
 	typedef CUIWindow inherited;
-	CUIXml*			m_uiXml;
+	CUIXml* m_uiXml;
 public:
-				CUITalkDialogWnd		();
-	virtual		~CUITalkDialogWnd		();
+			CUITalkDialogWnd();
+	virtual ~CUITalkDialogWnd();
 	
 
 			void InitTalkDialogWnd		();
@@ -58,8 +53,8 @@ public:
 	CUICharacterInfo	UICharacterInfoLeft;
 	CUICharacterInfo	UICharacterInfoRight;
 
-	void				AddQuestion			(LPCSTR str, LPCSTR value);
-	void				AddAnswer			(LPCSTR SpeakerName, const char* str, bool bActor);
+	void				AddQuestion			(LPCSTR str, LPCSTR value, int number);
+    void				AddAnswer			(LPCSTR SpeakerName, LPCSTR str, bool bActor);
 	void				AddIconedAnswer		(LPCSTR caption, LPCSTR text, LPCSTR texture_name, LPCSTR templ_name);
 	void				ClearAll			();
 	void				ClearQuestions		();
@@ -84,13 +79,13 @@ private:
 	void __stdcall		OnExitClicked			(CUIWindow* w, void*);
 };
 
-
 class CUIQuestionItem :public CUIWindow, public CUIWndCallback
 {
 	typedef CUIWindow inherited;
 	float			m_min_height;
 public:
 	CUI3tButtonEx*	m_text;
+    CUIStatic*		m_num_text;
 	shared_str		m_s_value;
 					CUIQuestionItem			(CUIXml* xml_doc, LPCSTR path);
 	void			Init					(LPCSTR val, LPCSTR text);
