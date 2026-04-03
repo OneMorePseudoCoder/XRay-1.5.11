@@ -386,8 +386,6 @@ public:
 	void					PickupModeOn		();
 	void					PickupModeOff		();
 
-
-
 	//////////////////////////////////////////////////////////////////////////
 	// Motions (передвижения актрера)
 	//////////////////////////////////////////////////////////////////////////
@@ -404,6 +402,7 @@ public:
 	bool					CanJump					();
 	bool					CanMove					();
 	float					CameraHeight			();
+	float					CurrentHeight;
 	bool					CanSprint				();
 	bool					CanRun					();
 	void					StopAnyMove				();
@@ -763,10 +762,16 @@ add_to_type_list(CActor)
 #undef script_type_list
 #define script_type_list save_type_list(CActor)
 
-extern bool		isActorAccelerated			(u32 mstate, bool ZoomMode);
+extern bool isActorAccelerated(u32 mstate, bool ZoomMode);
 
-IC	CActorCondition	&CActor::conditions	() const{ VERIFY(m_entity_condition); return(*m_entity_condition);}
+IC CActorCondition &CActor::conditions() const
+{ 
+	VERIFY(m_entity_condition);
+	return(*m_entity_condition);
+}
 
-extern CActor*		g_actor;
-CActor*				Actor		();
-extern const float	s_fFallTime;
+extern CActor* g_actor;
+CActor* Actor();
+extern const float s_fFallTime;
+extern float cam_HeightInterpolationSpeed;
+extern float cam_LookoutSpeed;

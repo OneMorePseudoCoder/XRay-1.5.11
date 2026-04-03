@@ -27,12 +27,10 @@ static const float	s_fJumpGroundTime	= 0.1f;	// для снятия флажка Jump если на з
 
 IC static void generate_orthonormal_basis1(const Fvector& dir,Fvector& updir, Fvector& right)
 {
-
 	right.crossproduct(dir,updir); //. <->
 	right.normalize();
 	updir.crossproduct(right,dir);
 }
-
 
 void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 {
@@ -128,26 +126,30 @@ void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 	};
 };
 
+static float moving_box_delay = 0;
+static bool crouch_move = false;
+static bool crouch_stop = false;
+
 void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Jump, float dt)
 {
-	float					cam_eff_factor = 0.0f;
-	mstate_old				= mstate_real;
-	vControlAccel.set		(0,0,0);
+	float cam_eff_factor = 0.0f;
+	mstate_old = mstate_real;
+	vControlAccel.set(0, 0, 0);
 
 	if (!(mstate_real&mcFall) && (character_physics_support()->movement()->Environment()==CPHMovementControl::peInAir)) 
 	{
-		m_fFallTime				-=	dt;
-		if (m_fFallTime<=0.f)
+		m_fFallTime -= dt;
+		if (m_fFallTime <= 0.f)
 		{
-			m_fFallTime			=	s_fFallTime;
-			mstate_real			|=	mcFall;
-			mstate_real			&=~	mcJump;
+			m_fFallTime = s_fFallTime;
+			mstate_real |= mcFall;
+			mstate_real &= ~mcJump;
 		}
 	}
 
-	if(!CanMove()) 
+	if (!CanMove()) 
 	{
-		if(mstate_wf&mcAnyMove) 
+		if (mstate_wf&mcAnyMove) 
 		{
 			StopAnyMove();
 			mstate_wf &= ~mcAnyMove;
@@ -156,44 +158,49 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 	}
 
 	// update player accel
-	if (mstate_wf&mcFwd)		vControlAccel.z +=  1;
-	if (mstate_wf&mcBack)		vControlAccel.z += -1;
-	if (mstate_wf&mcLStrafe)	vControlAccel.x += -1;
-	if (mstate_wf&mcRStrafe)	vControlAccel.x +=  1;
+	if (mstate_wf&mcFwd)
+		vControlAccel.z +=  1;
+
+	if (mstate_wf&mcBack)
+		vControlAccel.z += -1;
+
+	if (mstate_wf&mcLStrafe)
+		vControlAccel.x += -1;
+
+	if (mstate_wf&mcRStrafe)
+		vControlAccel.x +=  1;
 
 	CPHMovementControl::EEnvironment curr_env = character_physics_support()->movement()->Environment();
-	if(curr_env==CPHMovementControl::peOnGround || curr_env==CPHMovementControl::peAtWall )
+	if (curr_env == CPHMovementControl::peOnGround || curr_env == CPHMovementControl::peAtWall)
 	{
-		// crouch
-		if ((0==(mstate_real&mcCrouch))&&(mstate_wf&mcCrouch))
+		if ((mstate_real & mcCrouch) == 0 && (mstate_wf & mcCrouch)) 
 		{
-			if(mstate_real&mcClimb)
+			if (mstate_real & mcClimb)
 			{
-				mstate_wf&=~mcCrouch;
-			}
-			else
+				mstate_wf &= ~mcCrouch;
+            }
+            else 
 			{
 				character_physics_support()->movement()->EnableCharacter();
-				bool Crouched = false;
-				if(isActorAccelerated(mstate_wf, IsZoomAimingMode()))
-					Crouched = character_physics_support()->movement()->ActivateBoxDynamic(1);
-				else
-					Crouched = character_physics_support()->movement()->ActivateBoxDynamic(2);
-				
-				if(Crouched) 
-					mstate_real			|=	mcCrouch;
-			}
+                bool Crouched = false;
+                if (isActorAccelerated(mstate_wf, IsZoomAimingMode()))
+					Crouched = character_physics_support()->movement()->ActivateBoxDynamic((mstate_wf & mcAnyMove) ? 3 : 1);
+                else
+					Crouched = character_physics_support()->movement()->ActivateBoxDynamic((mstate_wf & mcAnyMove) ? 4 : 2);
+                if (Crouched)
+					mstate_real |= mcCrouch;
+             }
 		}
+
 		// jump
-		m_fJumpTime				-=	dt;
+		m_fJumpTime -= dt;
 
-		if( CanJump() && (mstate_wf&mcJump) )
+		if (CanJump() && (mstate_wf&mcJump))
 		{
-			mstate_real			|=	mcJump;
-			m_bJumpKeyPressed	=	TRUE;
-			Jump				= m_fJumpSpeed;
-			m_fJumpTime			= s_fJumpTime;
-
+			mstate_real |= mcJump;
+			m_bJumpKeyPressed = TRUE;
+			Jump = m_fJumpSpeed;
+			m_fJumpTime = s_fJumpTime;
 
 			//уменьшить силу игрока из-за выполненого прыжка
 			if (!GodMode())
@@ -201,37 +208,92 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 		}
 
 		// mask input into "real" state
-		u32 move	= mcAnyMove|mcAccel;
+		u32 move = mcAnyMove | mcAccel;
 
-		if(mstate_real&mcCrouch)
+		if (mstate_real & mcCrouch) 
 		{
-			if (!isActorAccelerated(mstate_real, IsZoomAimingMode()) && isActorAccelerated(mstate_wf, IsZoomAimingMode()))
+			if (!isActorAccelerated(mstate_real, IsZoomAimingMode()) && isActorAccelerated(mstate_wf, IsZoomAimingMode())) 
+			{ 
+				character_physics_support()->movement()->EnableCharacter();
+                if (!character_physics_support()->movement()->ActivateBoxDynamic((mstate_wf & mcAnyMove) ? 3 : 1))
+					move &= ~mcAccel;
+            }
+			else if (isActorAccelerated(mstate_real, IsZoomAimingMode()) && !isActorAccelerated(mstate_wf, IsZoomAimingMode())) 
 			{
 				character_physics_support()->movement()->EnableCharacter();
-				if(!character_physics_support()->movement()->ActivateBoxDynamic(1))move	&=~mcAccel;
+				if (character_physics_support()->movement()->ActivateBoxDynamic((mstate_wf & mcAnyMove ) ? 4 : 2))
+					mstate_real &= ~mcAccel;
+            }
+			else if ((mstate_real & mcAnyMove) && !(mstate_wf & mcAnyMove)) 
+			{
+				character_physics_support()->movement()->EnableCharacter();
+				character_physics_support()->movement()->ActivateBoxDynamic( isActorAccelerated( mstate_wf, IsZoomAimingMode() ) ? 1 : 2 );
+				moving_box_delay = 0;
+				crouch_move = false;
+				crouch_stop = false;
 			}
+            else if (moving_box_delay > 0) 
+			{
+				moving_box_delay -= dt;
+			}
+			else if ((mstate_real & mcAnyMove) && moving_box_delay <= 0 && !crouch_move) 
+			{
+				character_physics_support()->movement()->EnableCharacter();
+				if ( isActorAccelerated( mstate_real, IsZoomAimingMode() ) ) 
+				{
+					if ( !character_physics_support()->movement()->ActivateBoxDynamic( 3 ) ) 
+					{
+						character_physics_support()->movement()->ActivateBoxDynamic( 1 );
+                        StopAnyMove();
+                        mstate_wf &= ~mcAnyMove;
+					}
+				}
+				else 
+				{
+					if (!character_physics_support()->movement()->ActivateBoxDynamic(4)) 
+					{
+						character_physics_support()->movement()->ActivateBoxDynamic( 2 );
+                        StopAnyMove();
+                        mstate_wf &= ~mcAnyMove;
+					}
+				}
 
-			if (isActorAccelerated(mstate_real, IsZoomAimingMode()) && !isActorAccelerated(mstate_wf, IsZoomAimingMode()))
-			{
-				character_physics_support()->movement()->EnableCharacter();
-				if(character_physics_support()->movement()->ActivateBoxDynamic(2))mstate_real	&=~mcAccel;
+				moving_box_delay = .1f;
+				crouch_move = true;
+				crouch_stop = false;
 			}
+			else if (!(mstate_real & mcAnyMove) && moving_box_delay <= 0 && !crouch_stop) 
+			{
+				DWORD id = isActorAccelerated(mstate_real, IsZoomAimingMode()) ? 1 : 2;
+				character_physics_support()->movement()->EnableCharacter();
+				character_physics_support()->movement()->ActivateBoxDynamic(id);
+				moving_box_delay = .1f;
+				crouch_move = false;
+				crouch_stop = true;
+			}
+		}
+		else 
+		{
+			moving_box_delay = 0;
+			crouch_move = false;
+			crouch_stop = false;
 		}
 
 		if ((mstate_wf&mcSprint) && !CanSprint())
-			mstate_wf				&= ~mcSprint;
+			mstate_wf &= ~mcSprint;
 
 		mstate_real &= (~move);
 		mstate_real |= (mstate_wf & move);
 
-		if(mstate_wf&mcSprint)
+		if (mstate_wf&mcSprint)
 			mstate_real|=mcSprint;
 		else
 			mstate_real&=~mcSprint;
-		if(!(mstate_real&(mcFwd|mcLStrafe|mcRStrafe))||mstate_real&(mcCrouch|mcClimb)|| !isActorAccelerated(mstate_wf, IsZoomAimingMode()))
+
+		if (!(mstate_real&(mcFwd|mcLStrafe|mcRStrafe))||mstate_real&(mcCrouch|mcClimb)|| !isActorAccelerated(mstate_wf, IsZoomAimingMode()))
 		{
-			mstate_real&=~mcSprint;
-			mstate_wishful&=~mcSprint;
+			mstate_real &= ~mcSprint;
+			mstate_wishful &= ~mcSprint;
 		}
 				
 		// check player move state
@@ -329,12 +391,14 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 	mOrient.transform_dir(vControlAccel);
 }
 
+// Alex ADD: smooth crouch fix
+float cam_LookoutSpeed = 2.f;
+
 #define ACTOR_ANIM_SECT "actor_animation"
+#define ACTOR_LLOOKOUT_ANGLE PI_DIV_4
+#define ACTOR_RLOOKOUT_ANGLE PI_DIV_4
 
-#define ACTOR_LLOOKOUT_ANGLE	PI_DIV_4
-#define ACTOR_RLOOKOUT_ANGLE	PI_DIV_4
-
-void CActor::g_Orientate	(u32 mstate_rl, float dt)
+void CActor::g_Orientate(u32 mstate_rl, float dt)
 {
 	static float fwd_l_strafe_yaw	= deg2rad(pSettings->r_float(ACTOR_ANIM_SECT,	"fwd_l_strafe_yaw"));
 	static float back_l_strafe_yaw	= deg2rad(pSettings->r_float(ACTOR_ANIM_SECT,	"back_l_strafe_yaw"));
@@ -392,11 +456,14 @@ void CActor::g_Orientate	(u32 mstate_rl, float dt)
 		if( (mstate_rl&mcLLookout) && (mstate_rl&mcRLookout) )
 			tgt_roll	= 0.0f;
 	}
-	if (!fsimilar(tgt_roll,r_torso_tgt_roll,EPS)){
-		angle_lerp		(r_torso_tgt_roll,tgt_roll,PI_MUL_2,dt);
-		r_torso_tgt_roll= angle_normalize_signed(r_torso_tgt_roll);
+
+	if (!fsimilar(tgt_roll, r_torso_tgt_roll, EPS))
+	{
+		r_torso_tgt_roll = angle_inertion_var(r_torso_tgt_roll, tgt_roll, 0.f, CurrentHeight * PI_MUL_2 * cam_LookoutSpeed, PI_DIV_2, dt);
+		r_torso_tgt_roll = angle_normalize_signed(r_torso_tgt_roll);
 	}
 }
+
 bool CActor::g_LadderOrient()
 {
 	Fvector leader_norm;
@@ -412,28 +479,8 @@ bool CActor::g_LadderOrient()
 	M.j.set(0.f,1.f,0.f);
 	generate_orthonormal_basis1(M.k,M.j,M.i);
 	M.i.invert();
-	//M.j.invert();
-
-
-	//Fquaternion q1,q2,q3;
-	//q1.set(XFORM());
-	//q2.set(M);
-	//q3.slerp(q1,q2,dt);
-	//Fvector angles1,angles2,angles3;
-	//XFORM().getHPB(angles1.x,angles1.y,angles1.z);
-	//M.getHPB(angles2.x,angles2.y,angles2.z);
-	////angle_lerp(angles3.x,angles1.x,angles2.x,dt);
-	////angle_lerp(angles3.y,angles1.y,angles2.y,dt);
-	////angle_lerp(angles3.z,angles1.z,angles2.z,dt);
-
-	//angles3.lerp(angles1,angles2,dt);
-	////angle_lerp(angles3.y,angles1.y,angles2.y,dt);
-	////angle_lerp(angles3.z,angles1.z,angles2.z,dt);
-	//angle_lerp(angles3.x,angles1.x,angles2.x,dt);
-	//XFORM().setHPB(angles3.x,angles3.y,angles3.z);
 	Fvector position;
 	position.set(Position());
-	//XFORM().rotation(q3);
 	VERIFY2(_valid(M),"Invalide matrix in g_LadderOrient");
 	XFORM().set(M);
 	VERIFY2(_valid(position),"Invalide position in g_LadderOrient");
@@ -591,7 +638,6 @@ void CActor::StopAnyMove()
 	mstate_wishful	&=		~mcAnyMove;
 	mstate_real		&=		~mcAnyMove;
 }
-
 
 bool CActor::is_jump()
 {

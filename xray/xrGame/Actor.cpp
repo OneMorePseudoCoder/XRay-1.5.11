@@ -78,17 +78,12 @@ const float	CActor::cam_inert_value = 0.7f;
 
 
 //skeleton
-
-
-
 static Fbox		bbStandBox;
 static Fbox		bbCrouchBox;
 static Fvector	vFootCenter;
 static Fvector	vFootExt;
 
 Flags32			psActorFlags={/*AF_DYNAMIC_MUSIC|*/AF_GODMODE_RT};
-
-
 
 CActor::CActor() : CEntityAlive()
 {
@@ -194,8 +189,10 @@ CActor::CActor() : CEntityAlive()
 
 	m_location_manager		= xr_new<CLocationManager>(this);
 	m_block_sprint_counter	= 0;
+	
+	// Alex ADD: for smooth crouch fix
+	CurrentHeight = 0.f;
 }
-
 
 CActor::~CActor()
 {
@@ -252,96 +249,116 @@ void CActor::reload	(LPCSTR section)
 	m_location_manager->reload	(section);
 }
 
-void CActor::Load	(LPCSTR section )
+void CActor::Load(LPCSTR section)
 {
-	// Msg						("Loading actor: %s",section);
-	inherited::Load				(section);
-	material().Load				(section);
-	CInventoryOwner::Load		(section);
-	m_location_manager->Load	(section);
+	inherited::Load(section);
+	material().Load(section);
+	CInventoryOwner::Load(section);
+	m_location_manager->Load(section);
 
 	if (GameID() == eGameIDSingle)
-		OnDifficultyChanged		();
-	//////////////////////////////////////////////////////////////////////////
-	ISpatial*		self			=	smart_cast<ISpatial*> (this);
-	if (self)	{
-		self->spatial.type	|=	STYPE_VISIBLEFORAI;
-		self->spatial.type	&= ~STYPE_REACTTOSOUND;
+		OnDifficultyChanged();
+
+	ISpatial* self = smart_cast<ISpatial*>(this);
+	if (self)	
+	{
+		self->spatial.type |= STYPE_VISIBLEFORAI;
+		self->spatial.type &= ~STYPE_REACTTOSOUND;
 	}
-	//////////////////////////////////////////////////////////////////////////
 
 	// m_PhysicMovementControl: General
-	//m_PhysicMovementControl->SetParent		(this);
-	Fbox	bb;Fvector	vBOX_center,vBOX_size;
-	// m_PhysicMovementControl: BOX
-	vBOX_center= pSettings->r_fvector3	(section,"ph_box2_center"	);
-	vBOX_size	= pSettings->r_fvector3	(section,"ph_box2_size"		);
-	bb.set	(vBOX_center,vBOX_center); bb.grow(vBOX_size);
-	character_physics_support()->movement()->SetBox		(2,bb);
+	Fbox bb;
+	Fvector vBOX_center, vBOX_size;
 
 	// m_PhysicMovementControl: BOX
-	vBOX_center= pSettings->r_fvector3	(section,"ph_box1_center"	);
-	vBOX_size	= pSettings->r_fvector3	(section,"ph_box1_size"		);
-	bb.set	(vBOX_center,vBOX_center); bb.grow(vBOX_size);
-	character_physics_support()->movement()->SetBox		(1,bb);
+	if (pSettings->line_exist(section, "ph_box4_center") && pSettings->line_exist( section, "ph_box4_size"))
+	{
+		vBOX_center = pSettings->r_fvector3(section, "ph_box4_center");
+		vBOX_size = pSettings->r_fvector3(section, "ph_box4_size");
+		bb.set(vBOX_center, vBOX_center);
+		bb.grow(vBOX_size);
+		character_physics_support()->movement()->SetBox(4, bb);
+	}
+	else
+		character_physics_support()->movement()->SetBox(4, bb);
 
 	// m_PhysicMovementControl: BOX
-	vBOX_center= pSettings->r_fvector3	(section,"ph_box0_center"	);
-	vBOX_size	= pSettings->r_fvector3	(section,"ph_box0_size"		);
-	bb.set	(vBOX_center,vBOX_center); bb.grow(vBOX_size);
-	character_physics_support()->movement()->SetBox		(0,bb);
+	if (pSettings->line_exist(section, "ph_box3_center") && pSettings->line_exist(section, "ph_box3_size")) 
+	{
+		vBOX_center = pSettings->r_fvector3(section, "ph_box3_center");
+		vBOX_size = pSettings->r_fvector3(section, "ph_box3_size");
+		bb.set(vBOX_center, vBOX_center);
+		bb.grow(vBOX_size);
+		character_physics_support()->movement()->SetBox(3, bb);
+	}
+	else
+		character_physics_support()->movement()->SetBox(3, bb);
 
-	//// m_PhysicMovementControl: Foots
-	//Fvector	vFOOT_center= pSettings->r_fvector3	(section,"ph_foot_center"	);
-	//Fvector	vFOOT_size	= pSettings->r_fvector3	(section,"ph_foot_size"		);
-	//bb.set	(vFOOT_center,vFOOT_center); bb.grow(vFOOT_size);
-	////m_PhysicMovementControl->SetFoots	(vFOOT_center,vFOOT_size);
+	// m_PhysicMovementControl: BOX
+	vBOX_center = pSettings->r_fvector3(section, "ph_box2_center");
+	vBOX_size = pSettings->r_fvector3(section, "ph_box2_size");
+	bb.set(vBOX_center, vBOX_center);
+	bb.grow(vBOX_size);
+	character_physics_support()->movement()->SetBox(2, bb);
+
+	// m_PhysicMovementControl: BOX
+	vBOX_center = pSettings->r_fvector3(section, "ph_box1_center");
+	vBOX_size = pSettings->r_fvector3(section, "ph_box1_size");
+	bb.set(vBOX_center, vBOX_center);
+	bb.grow(vBOX_size);
+	character_physics_support()->movement()->SetBox(1, bb);
+
+	// m_PhysicMovementControl: BOX
+	vBOX_center = pSettings->r_fvector3(section, "ph_box0_center");
+	vBOX_size = pSettings->r_fvector3(section, "ph_box0_size");
+	bb.set(vBOX_center, vBOX_center);
+	bb.grow(vBOX_size);
+	character_physics_support()->movement()->SetBox(0, bb);
 
 	// m_PhysicMovementControl: Crash speed and mass
-	float	cs_min		= pSettings->r_float	(section,"ph_crash_speed_min"	);
-	float	cs_max		= pSettings->r_float	(section,"ph_crash_speed_max"	);
-	float	mass		= pSettings->r_float	(section,"ph_mass"				);
-	character_physics_support()->movement()->SetCrashSpeeds	(cs_min,cs_max);
-	character_physics_support()->movement()->SetMass		(mass);
-	if(pSettings->line_exist(section,"stalker_restrictor_radius"))
-		character_physics_support()->movement()->SetActorRestrictorRadius(CPHCharacter::rtStalker,pSettings->r_float(section,"stalker_restrictor_radius"));
-	if(pSettings->line_exist(section,"stalker_small_restrictor_radius"))
-		character_physics_support()->movement()->SetActorRestrictorRadius(CPHCharacter::rtStalkerSmall,pSettings->r_float(section,"stalker_small_restrictor_radius"));
-	if(pSettings->line_exist(section,"medium_monster_restrictor_radius"))
-		character_physics_support()->movement()->SetActorRestrictorRadius(CPHCharacter::rtMonsterMedium,pSettings->r_float(section,"medium_monster_restrictor_radius"));
+	float cs_min = pSettings->r_float(section, "ph_crash_speed_min");
+	float cs_max = pSettings->r_float(section, "ph_crash_speed_max");
+	float mass = pSettings->r_float(section, "ph_mass");
+
+	character_physics_support()->movement()->SetCrashSpeeds(cs_min, cs_max);
+	character_physics_support()->movement()->SetMass(mass);
+
+	if (pSettings->line_exist(section, "stalker_restrictor_radius"))
+		character_physics_support()->movement()->SetActorRestrictorRadius(CPHCharacter::rtStalker, pSettings->r_float(section, "stalker_restrictor_radius"));
+	if (pSettings->line_exist(section, "stalker_small_restrictor_radius"))
+		character_physics_support()->movement()->SetActorRestrictorRadius(CPHCharacter::rtStalkerSmall, pSettings->r_float(section, "stalker_small_restrictor_radius"));
+	if (pSettings->line_exist(section, "medium_monster_restrictor_radius"))
+		character_physics_support()->movement()->SetActorRestrictorRadius(CPHCharacter::rtMonsterMedium, pSettings->r_float(section, "medium_monster_restrictor_radius"));
+
 	character_physics_support()->movement()->Load(section);
 
-	
+	m_fWalkAccel = pSettings->r_float(section, "walk_accel");	
+	m_fJumpSpeed = pSettings->r_float(section, "jump_speed");
+	m_fRunFactor = pSettings->r_float(section, "run_coef");
+	m_fRunBackFactor = pSettings->r_float(section, "run_back_coef");
+	m_fWalkBackFactor = pSettings->r_float(section, "walk_back_coef");
+	m_fCrouchFactor = pSettings->r_float(section, "crouch_coef");
+	m_fClimbFactor = pSettings->r_float(section, "climb_coef");
+	m_fSprintFactor = pSettings->r_float(section, "sprint_koef");
 
-	m_fWalkAccel				= pSettings->r_float(section,"walk_accel");	
-	m_fJumpSpeed				= pSettings->r_float(section,"jump_speed");
-	m_fRunFactor				= pSettings->r_float(section,"run_coef");
-	m_fRunBackFactor			= pSettings->r_float(section,"run_back_coef");
-	m_fWalkBackFactor			= pSettings->r_float(section,"walk_back_coef");
-	m_fCrouchFactor				= pSettings->r_float(section,"crouch_coef");
-	m_fClimbFactor				= pSettings->r_float(section,"climb_coef");
-	m_fSprintFactor				= pSettings->r_float(section,"sprint_koef");
+	m_fWalk_StrafeFactor = READ_IF_EXISTS(pSettings, r_float, section, "walk_strafe_coef", 1.0f);
+	m_fRun_StrafeFactor = READ_IF_EXISTS(pSettings, r_float, section, "run_strafe_coef", 1.0f);
 
-	m_fWalk_StrafeFactor		= READ_IF_EXISTS(pSettings, r_float, section, "walk_strafe_coef", 1.0f);
-	m_fRun_StrafeFactor			= READ_IF_EXISTS(pSettings, r_float, section, "run_strafe_coef", 1.0f);
-
-
-	m_fCamHeightFactor			= pSettings->r_float(section,"camera_height_factor");
+	m_fCamHeightFactor = pSettings->r_float(section,"camera_height_factor");
 	character_physics_support()->movement()->SetJumpUpVelocity(m_fJumpSpeed);
-	float AirControlParam		= pSettings->r_float(section,"air_control_param"	);
+	float AirControlParam = pSettings->r_float(section,"air_control_param");
 	character_physics_support()->movement()->SetAirControlParam(AirControlParam);
 
-	m_fPickupInfoRadius			= pSettings->r_float(section,"pickup_info_radius");
+	m_fPickupInfoRadius = pSettings->r_float(section, "pickup_info_radius");
 
-	m_fFeelGrenadeRadius		= pSettings->r_float(section,"feel_grenade_radius");
-	m_fFeelGrenadeTime			= pSettings->r_float(section,"feel_grenade_time");
-	m_fFeelGrenadeTime			*= 1000.0f;
+	m_fFeelGrenadeRadius = pSettings->r_float(section, "feel_grenade_radius");
+	m_fFeelGrenadeTime = pSettings->r_float(section, "feel_grenade_time");
+	m_fFeelGrenadeTime *= 1000.0f;
 	
-	character_physics_support()->in_Load		(section);
+	character_physics_support()->in_Load(section);
 	
 	//загрузить параметры смещения firepoint
-	m_vMissileOffset			= pSettings->r_fvector3(section,"missile_throw_offset");
-
+	m_vMissileOffset = pSettings->r_fvector3(section, "missile_throw_offset");
 
 if(!g_dedicated_server)
 {
@@ -395,7 +412,7 @@ if(!g_dedicated_server)
 
 	invincibility_fire_shield_1st	= READ_IF_EXISTS(pSettings,r_string,section,"Invincibility_Shield_1st",0);
 	invincibility_fire_shield_3rd	= READ_IF_EXISTS(pSettings,r_string,section,"Invincibility_Shield_3rd",0);
-//-----------------------------------------
+	//-----------------------------------------
 	m_AutoPickUp_AABB				= READ_IF_EXISTS(pSettings,r_fvector3,section,"AutoPickUp_AABB",Fvector().set(0.02f, 0.02f, 0.02f));
 	m_AutoPickUp_AABB_Offset		= READ_IF_EXISTS(pSettings,r_fvector3,section,"AutoPickUp_AABB_offs",Fvector().set(0, 0, 0));
 
@@ -409,6 +426,8 @@ if(!g_dedicated_server)
 	//---------------------------------------------------------------------
 	m_sHeadShotParticle	= READ_IF_EXISTS(pSettings,r_string,section,"HeadShotParticle",0);
 
+	// Alex ADD: for smooth crouch fix
+	CurrentHeight = CameraHeight();	
 }
 
 void CActor::PHHit(SHit &H)
