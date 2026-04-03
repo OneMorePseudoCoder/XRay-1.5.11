@@ -32,11 +32,17 @@ public:
 				CWeaponAmmo*	 object						() {return (CWeaponAmmo*)m_pData;}
 };
 
-class CUIWeaponCellItem :public CUIInventoryCellItem
+class CUIWeaponCellItem : public CUIInventoryCellItem
 {
 	typedef  CUIInventoryCellItem	inherited;
 public:
-	enum eAddonType{	eSilencer=0, eScope, eLauncher, eMaxAddon};
+	enum eAddonType
+	{	
+		eSilencer = 0,
+		eScope,
+		eLauncher,
+		eMaxAddon
+	};
 protected:
 	CUIStatic*					m_addons					[eMaxAddon];
 	Fvector2					m_addon_offset				[eMaxAddon];
@@ -57,7 +63,8 @@ public:
 	virtual		void			OnAfterChild				(CUIDragDropListEx* parent_list);
 	virtual		CUIDragItem*	CreateDragItem				();
 	virtual		bool			EqualTo						(CUICellItem* itm);
-	CUIStatic*					get_addon_static			(u32 idx)				{return m_addons[idx];}
+	CUIStatic*					get_addon_static			(u32 idx)				{ return m_addons[idx]; }
+	Fvector2					get_addon_offset			(u32 idx)				{ return m_addon_offset[idx]; }
 };
 
 class CBuyItemCustomDrawCell :public ICustomDrawCell

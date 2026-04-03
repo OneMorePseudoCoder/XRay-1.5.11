@@ -8,7 +8,6 @@
 #include "../CustomOutfit.h"
 #include "../HUDManager.h"
 #include "../PDA.h"
-//.7#include "../WeaponHUD.h"
 #include "../xrServerEntities/character_info.h"
 #include "../inventory.h"
 #include "../UIGameSP.h"
@@ -31,8 +30,8 @@
 #include "../actorcondition.h"
 #include "../string_table.h"
 #ifdef DEBUG
-#	include "../attachable_item.h"
-#	include "../../xrEngine/xr_input.h"
+#include "../attachable_item.h"
+#include "../../xrEngine/xr_input.h"
 #endif
 #include "UIScrollView.h"
 #include "map_hint.h"
@@ -43,8 +42,8 @@
 #include "UIHudStatesWnd.h"
 #include "UIActorMenu.h"
 
-void test_draw	();
-void test_key	(int dik);
+void test_draw();
+void test_key(int dik);
 
 #include "../Include/xrRender/Kinematics.h"
 #include <functional>
@@ -261,8 +260,8 @@ void CUIMainIngameWnd::Draw()
 	RenderQuickInfos();		
 }
 
-
-void CUIMainIngameWnd::SetMPChatLog(CUIWindow* pChat, CUIWindow* pLog){
+void CUIMainIngameWnd::SetMPChatLog(CUIWindow* pChat, CUIWindow* pLog)
+{
 	m_pMPChatWnd = pChat;
 	m_pMPLogWnd  = pLog;
 }
@@ -639,61 +638,114 @@ void CUIMainIngameWnd::AnimateContacts(bool b_snd)
 {
 	UIZoneMap->Counter_ResetClrAnimation();
 
-	if(b_snd)
-		HUD_SOUND_ITEM::PlaySound	(m_contactSnd, Fvector().set(0,0,0), 0, true );
-
+	if (b_snd)
+		HUD_SOUND_ITEM::PlaySound(m_contactSnd, Fvector().set(0, 0, 0), 0, true);
 }
 
-
-void CUIMainIngameWnd::SetPickUpItem	(CInventoryItem* PickUpItem)
+void CUIMainIngameWnd::SetPickUpItem(CInventoryItem* PickUpItem)
 {
 	m_pPickUpItem = PickUpItem;
 };
 
-void CUIMainIngameWnd::UpdatePickUpItem	()
+#include "UICellCustomItems.h"
+typedef CUIWeaponCellItem::eAddonType eAddonType;
+
+CUIStatic* init_addon(CUIWeaponCellItem *cell_item, LPCSTR sect, float scale, float scale_x, eAddonType idx)
+{
+	CUIStatic *addon = new CUIStatic();
+	addon->SetAutoDelete(true);
+
+	auto pos = cell_item->get_addon_offset(idx);
+	pos.x *= scale*scale_x;
+	pos.y *= scale;
+	auto width = (float)pSettings->r_u32(sect, "inv_grid_width") * INV_GRID_WIDTH;
+	auto height = (float)pSettings->r_u32(sect, "inv_grid_height") * INV_GRID_HEIGHT;
+	auto tex_x = (float)pSettings->r_u32(sect, "inv_grid_x") * INV_GRID_WIDTH;
+	auto tex_y = (float)pSettings->r_u32(sect, "inv_grid_y") * INV_GRID_HEIGHT;
+
+	addon->SetStretchTexture(true);
+	addon->InitTexture("ui\\ui_icon_equipment");
+	addon->SetOriginalRect(Frect().set(tex_x, tex_y, tex_x + width, tex_y + height));
+	addon->SetWndRect(Frect().set(pos.x, pos.y, pos.x + width * scale * scale_x, pos.y + height * scale));
+	addon->SetColor(color_rgba(255, 255, 255, 192));
+
+	return addon;
+}
+
+u16 stored_id = 65535;
+void CUIMainIngameWnd::UpdatePickUpItem()
 {
 	if (!m_pPickUpItem || !Level().CurrentViewEntity() || !smart_cast<CActor*>(Level().CurrentViewEntity())) 
 	{
 		UIPickUpItemIcon.Show(false);
+		UIPickUpItemIcon.DetachAll();
+		stored_id = 65535;
 		return;
 	};
 
+	u16 _id	= m_pPickUpItem->object().ID();
+	if (_id == stored_id)
+		return;
+	stored_id = _id;
 
-	shared_str sect_name	= m_pPickUpItem->object().cNameSect();
+	shared_str sect_name = m_pPickUpItem->object().cNameSect();
 
 	//properties used by inventory menu
-	int m_iGridWidth	= pSettings->r_u32(sect_name, "inv_grid_width");
-	int m_iGridHeight	= pSettings->r_u32(sect_name, "inv_grid_height");
+	int m_iGridWidth = pSettings->r_u32(sect_name, "inv_grid_width");
+	int m_iGridHeight = pSettings->r_u32(sect_name, "inv_grid_height");
 
-	int m_iXPos			= pSettings->r_u32(sect_name, "inv_grid_x");
-	int m_iYPos			= pSettings->r_u32(sect_name, "inv_grid_y");
+	int m_iXPos = pSettings->r_u32(sect_name, "inv_grid_x");
+	int m_iYPos = pSettings->r_u32(sect_name, "inv_grid_y");
 
-	float scale_x = m_iPickUpItemIconWidth/
-		float(m_iGridWidth*INV_GRID_WIDTH);
+	float scale_x = m_iPickUpItemIconWidth / float(m_iGridWidth*INV_GRID_WIDTH);
+	float scale_y = m_iPickUpItemIconHeight / float(m_iGridHeight*INV_GRID_HEIGHT);
 
-	float scale_y = m_iPickUpItemIconHeight/
-		float(m_iGridHeight*INV_GRID_HEIGHT);
+	scale_x = (scale_x > 1) ? 1.0f : scale_x;
+	scale_y = (scale_y > 1) ? 1.0f : scale_y;
 
-	scale_x = (scale_x>1) ? 1.0f : scale_x;
-	scale_y = (scale_y>1) ? 1.0f : scale_y;
+	float scale = scale_x < scale_y ? scale_x : scale_y;
 
-	float scale = scale_x<scale_y?scale_x:scale_y;
-
-	UIPickUpItemIcon.GetUIStaticItem().SetOriginalRect(
-		float(m_iXPos * INV_GRID_WIDTH),
-		float(m_iYPos * INV_GRID_HEIGHT),
-		float(m_iGridWidth * INV_GRID_WIDTH),
-		float(m_iGridHeight * INV_GRID_HEIGHT));
-
+	UIPickUpItemIcon.GetUIStaticItem().SetOriginalRect(float(m_iXPos * INV_GRID_WIDTH), float(m_iYPos * INV_GRID_HEIGHT), float(m_iGridWidth * INV_GRID_WIDTH), float(m_iGridHeight * INV_GRID_HEIGHT));
 	UIPickUpItemIcon.SetStretchTexture(true);
 
-	UIPickUpItemIcon.SetWidth(m_iGridWidth*INV_GRID_WIDTH*scale);
-	UIPickUpItemIcon.SetHeight(m_iGridHeight*INV_GRID_HEIGHT*scale);
+	// Real Wolf: Исправляем растягивание. 10.08.2014.
+	scale_x = Device.fASPECT / 0.75f;
 
-	UIPickUpItemIcon.SetWndPos(Fvector2().set(	m_iPickUpItemIconX+(m_iPickUpItemIconWidth-UIPickUpItemIcon.GetWidth())/2.0f,
-												m_iPickUpItemIconY+(m_iPickUpItemIconHeight-UIPickUpItemIcon.GetHeight())/2.0f) );
+	UIPickUpItemIcon.SetWidth(m_iGridWidth * INV_GRID_WIDTH * scale * scale_x);
+	UIPickUpItemIcon.SetHeight(m_iGridHeight * INV_GRID_HEIGHT * scale);
 
-	UIPickUpItemIcon.SetColor(color_rgba(255,255,255,192));
+	UIPickUpItemIcon.SetWndPos(Fvector2().set(m_iPickUpItemIconX + (m_iPickUpItemIconWidth-UIPickUpItemIcon.GetWidth()) / 2.0f, m_iPickUpItemIconY + (m_iPickUpItemIconHeight-UIPickUpItemIcon.GetHeight()) / 2.0f));
+
+	// Real Wolf: Добавляем к иконке аддоны оружия. 10.08.2014.
+	if (auto wpn = m_pPickUpItem->cast_weapon())
+	{
+		auto cell_item = new CUIWeaponCellItem(wpn);
+
+		if (wpn->SilencerAttachable() && wpn->IsSilencerAttached())
+		{
+			auto sil = init_addon(cell_item, *wpn->GetSilencerName(), scale, scale_x, eAddonType::eSilencer);
+			UIPickUpItemIcon.AttachChild(sil);
+		}
+
+		if (wpn->ScopeAttachable() && wpn->IsScopeAttached())
+		{
+			auto scope = init_addon(cell_item, *wpn->GetScopeName(), scale, scale_x, eAddonType::eScope);
+			UIPickUpItemIcon.AttachChild(scope);
+		}
+
+		if (wpn->GrenadeLauncherAttachable() && wpn->IsGrenadeLauncherAttached())
+		{
+			auto launcher = init_addon(cell_item, *wpn->GetGrenadeLauncherName(), scale, scale_x, eAddonType::eLauncher);
+			UIPickUpItemIcon.AttachChild(launcher);
+		}
+		delete_data(cell_item);
+	}
+	else
+	{
+		UIPickUpItemIcon.DetachAll();
+	}
+
+	UIPickUpItemIcon.SetColor(color_rgba(255, 255, 255, 192));
 	UIPickUpItemIcon.Show(true);
 };
 
