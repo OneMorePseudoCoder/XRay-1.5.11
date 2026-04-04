@@ -1704,10 +1704,10 @@ void CWeapon::debug_draw_firedeps()
 #endif // DEBUG
 }
 
-const float &CWeapon::hit_probability	() const
+const float &CWeapon::hit_probability() const
 {
-	VERIFY					((g_SingleGameDifficulty >= egdNovice) && (g_SingleGameDifficulty <= egdMaster)); 
-	return					(m_hit_probability[egdNovice]);
+	VERIFY((g_SingleGameDifficulty >= egdNovice) && (g_SingleGameDifficulty <= egdMaster)); 
+	return(m_hit_probability[egdNovice]);
 }
 
 void CWeapon::OnStateSwitch	(u32 S)
@@ -1715,13 +1715,13 @@ void CWeapon::OnStateSwitch	(u32 S)
 	inherited::OnStateSwitch(S);
 	m_dwAmmoCurrentCalcFrame = 0;
 
-	if(GetState()==eReload)
+	if (GetState() == eReload)
 	{
-		if(H_Parent()==Level().CurrentEntity() && !fsimilar(m_zoom_params.m_ReloadDof.w,-1.0f))
+		if (H_Parent() == Level().CurrentEntity() && !fsimilar(m_zoom_params.m_ReloadDof.w, -1.0f))
 		{
-			CActor* current_actor	= smart_cast<CActor*>(H_Parent());
+			CActor* current_actor = smart_cast<CActor*>(H_Parent());
 			if (current_actor)
-				current_actor->Cameras().AddCamEffector(xr_new<CEffectorDOF>(m_zoom_params.m_ReloadDof) );
+				current_actor->Cameras().AddCamEffector(xr_new<CEffectorDOF>(m_zoom_params.m_ReloadDof));
 		}
 	}
 }
@@ -1733,16 +1733,11 @@ void CWeapon::OnAnimationEnd(u32 state)
 
 u8 CWeapon::GetCurrentHudOffsetIdx()
 {
-	CActor* pActor	= smart_cast<CActor*>(H_Parent());
-	if(!pActor)		return 0;
-	
-	bool b_aiming		= 	((IsZoomed() && m_zoom_params.m_fZoomRotationFactor<=1.f) ||
-							(!IsZoomed() && m_zoom_params.m_fZoomRotationFactor>0.f));
-
-	if(!b_aiming)
-		return		0;
-	else
-		return		1;
+	CActor* pActor = smart_cast<CActor*>(H_Parent());
+	if (!pActor)
+		return 0;
+ 
+	return ((IsZoomed() && m_zoom_params.m_fZoomRotationFactor <= 1.f) || (!IsZoomed() && m_zoom_params.m_fZoomRotationFactor > 0.f)) ? 1 : 0;
 }
 
 void CWeapon::render_hud_mode()
@@ -1757,5 +1752,35 @@ bool CWeapon::MovingAnimAllowedNow()
 
 bool CWeapon::IsHudModeNow()
 {
-	return (HudItemData()!=NULL);
+	return (HudItemData() != NULL);
+}
+
+u32 CWeapon::Cost() const
+{
+	u32 res = CInventoryItemObject::Cost();
+
+	if (IsGrenadeLauncherAttached() && GetGrenadeLauncherName().size())
+	{
+		res += pSettings->r_u32(GetGrenadeLauncherName(), "cost");
+	}
+
+	if (IsScopeAttached() && GetScopeName().size())
+	{
+		res += pSettings->r_u32(GetScopeName(), "cost");
+	}
+
+	if (IsSilencerAttached() && GetSilencerName().size())
+	{
+		res += pSettings->r_u32(GetSilencerName(), "cost");
+	}
+
+	if (iAmmoElapsed)
+	{
+		float c = pSettings->r_float(*m_ammoTypes[m_ammoType], "cost");
+		float bs = pSettings->r_float(*m_ammoTypes[m_ammoType], "box_size");
+
+		res += iFloor(c*(iAmmoElapsed / bs));
+	}
+
+	return res;
 }
