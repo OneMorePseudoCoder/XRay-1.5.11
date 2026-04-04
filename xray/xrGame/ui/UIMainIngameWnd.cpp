@@ -652,7 +652,7 @@ typedef CUIWeaponCellItem::eAddonType eAddonType;
 
 CUIStatic* init_addon(CUIWeaponCellItem *cell_item, LPCSTR sect, float scale, float scale_x, eAddonType idx)
 {
-	CUIStatic *addon = new CUIStatic();
+	CUIStatic *addon = xr_new<CUIStatic>();
 	addon->SetAutoDelete(true);
 
 	auto pos = cell_item->get_addon_offset(idx);
