@@ -547,6 +547,7 @@
     <ClInclude Include="..\xrRender\LightTrack.h" />
     <ClInclude Include="..\xrRender\Light_DB.h" />
     <ClInclude Include="..\xrRender\Light_Package.h" />
+    <ClInclude Include="..\xrRender\Light_Render_Direct.h" />
     <ClInclude Include="..\xrRender\ModelPool.h" />
     <ClInclude Include="..\xrRender\NvTriStrip.h" />
     <ClInclude Include="..\xrRender\NvTriStripObjects.h" />
@@ -610,7 +611,6 @@
     <ClInclude Include="dx10MinMaxSMBlender.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="light_gi.h" />
-    <ClInclude Include="Light_Render_Direct.h" />
     <ClInclude Include="light_smapvis.h" />
     <ClInclude Include="pch\stdafx.h" />
     <ClInclude Include="r3_types.h" />
@@ -777,6 +777,8 @@
     <ClCompile Include="..\xrRender\LightTrack.cpp" />
     <ClCompile Include="..\xrRender\Light_DB.cpp" />
     <ClCompile Include="..\xrRender\Light_Package.cpp" />
+    <ClCompile Include="..\xrRender\Light_Render_Direct.cpp" />
+    <ClCompile Include="..\xrRender\Light_Render_Direct_ComputeXFS.cpp" />
     <ClCompile Include="..\xrRender\ModelPool.cpp" />
     <ClCompile Include="..\xrRender\NvTriStrip.cpp" />
     <ClCompile Include="..\xrRender\NvTriStripObjects.cpp" />
@@ -839,8 +841,6 @@
     <ClCompile Include="blender_ssao.cpp" />
     <ClCompile Include="dx10MinMaxSMBlender.cpp" />
     <ClCompile Include="light_GI.cpp" />
-    <ClCompile Include="Light_Render_Direct.cpp" />
-    <ClCompile Include="Light_Render_Direct_ComputeXFS.cpp" />
     <ClCompile Include="light_smapvis.cpp" />
     <ClCompile Include="light_vis.cpp" />
     <ClCompile Include="pch\stdafx.cpp">
