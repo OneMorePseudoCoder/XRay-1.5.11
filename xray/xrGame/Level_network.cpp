@@ -27,13 +27,13 @@ extern bool	g_b_ClearGameCaptions;
 
 void CLevel::remove_objects	()
 {
-	if (!IsGameTypeSingle()) Msg("CLevel::remove_objects - Start");
+	if (!IsGameTypeSingle())
+		Msg("CLevel::remove_objects - Start");
+
 	BOOL						b_stored = psDeviceFlags.test(rsDisableObjectsAsCrows);
 	
-//.	if (game)
-//.		Game().reset_ui				();
-
-	if (OnServer()) {
+	if (OnServer()) 
+	{
 		VERIFY					(Server);
 		Server->SLS_Clear		();
 	}
@@ -43,7 +43,8 @@ void CLevel::remove_objects	()
 
 	snd_Events.clear			();
 
-	for (int i=0; i<20; ++i) {
+	for (int i=0; i<20; ++i) 
+	{
 		psNET_Flags.set			(NETFLAG_MINIMIZEUPDATES,FALSE);
 		// ugly hack for checks that update is twice on frame
 		// we need it since we do updates for checking network messages
@@ -62,7 +63,7 @@ void CLevel::remove_objects	()
 	ph_commander().clear		();
 	ph_commander_scripts().clear();
 
-	if(!g_dedicated_server)
+	if (!g_dedicated_server)
 		space_restriction_manager().clear	();
 
 	psDeviceFlags.set			(rsDisableObjectsAsCrows, b_stored);
@@ -93,7 +94,8 @@ void CLevel::remove_objects	()
 
 //.	xr_delete									(m_seniority_hierarchy_holder);
 //.	m_seniority_hierarchy_holder				= xr_new<CSeniorityHierarchyHolder>();
-	if (!IsGameTypeSingle()) Msg("CLevel::remove_objects - End");
+	if (!IsGameTypeSingle())
+		Msg("CLevel::remove_objects - End");
 }
 
 #ifdef DEBUG
@@ -147,10 +149,11 @@ void CLevel::net_Stop		()
 
 void CLevel::ClientSend()
 {
-	if (GameID() == eGameIDSingle || OnClient())
+	if (GameID() != eGameIDSingle && OnClient())
 	{
-		if ( !net_HasBandwidth() ) return;
-	};
+		if (!net_HasBandwidth())
+			return;
+	}
 
 #ifdef BATTLEYE
 	battleye_system.UpdateClient();
