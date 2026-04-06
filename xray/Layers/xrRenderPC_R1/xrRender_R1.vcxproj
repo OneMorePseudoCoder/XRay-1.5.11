@@ -721,6 +721,7 @@
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Mixed|x64'">AssemblyAndSourceCode</AssemblerOutput>
     </ClCompile>
+    <ClCompile Include="..\xrRender\r__R_calculate.cpp" />
     <ClCompile Include="..\xrRender\r__screenshot.cpp" />
     <ClCompile Include="..\xrRender\r__sector.cpp" />
     <ClCompile Include="..\xrRender\r__sector_traversal.cpp" />

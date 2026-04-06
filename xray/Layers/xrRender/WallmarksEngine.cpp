@@ -10,8 +10,6 @@
 #include "../../xrEngine/GameFont.h"
 #include "SkeletonCustom.h"
 
-u32 g_r = 1;
-
 namespace WallmarksEngine 
 {
 	struct wm_slot
@@ -34,18 +32,18 @@ const float	W_DIST_FADE_SQR	= W_DIST_FADE * W_DIST_FADE;
 const float I_DIST_FADE_SQR	= 1.f / W_DIST_FADE_SQR;
 const int MAX_TRIS = 1024;
 
-IC bool operator== (const CWallmarksEngine::wm_slot* slot, const ref_shader& shader)
+IC bool operator==(const CWallmarksEngine::wm_slot* slot, const ref_shader& shader)
 {
 	return slot->shader == shader;
 }
 
-CWallmarksEngine::wm_slot* CWallmarksEngine::FindSlot	(ref_shader shader)
+CWallmarksEngine::wm_slot* CWallmarksEngine::FindSlot(ref_shader shader)
 {
 	WMSlotVecIt it = std::find(marks.begin(), marks.end(), shader);
 	return (it != marks.end()) ? *it : 0;
 }
 
-CWallmarksEngine::wm_slot* CWallmarksEngine::AppendSlot	(ref_shader shader)
+CWallmarksEngine::wm_slot* CWallmarksEngine::AppendSlot(ref_shader shader)
 {
 	marks.push_back(xr_new<wm_slot>(shader));
 	return marks.back();
@@ -57,7 +55,7 @@ CWallmarksEngine::wm_slot* CWallmarksEngine::AppendSlot	(ref_shader shader)
 
 CWallmarksEngine::CWallmarksEngine()
 #ifdef PROFILE_CRITICAL_SECTIONS
-	:lock(MUTEX_PROFILE_ID(CWallmarksEngine))
+	: lock(MUTEX_PROFILE_ID(CWallmarksEngine))
 #endif // PROFILE_CRITICAL_SECTIONS
 {
 	static_pool.reserve(256);
@@ -459,7 +457,7 @@ void CWallmarksEngine::Render()
 			}
 #endif
 
-			Device.Statistic->RenderDUMP_WMD_Count++;
+			Statistic.RenderDUMP_WMD_Count++;
 			u32 w_count	= u32(w_verts - w_start);
 			if ((w_count + W->VCount()) >= (MAX_TRIS * 3))
 			{
@@ -487,7 +485,7 @@ void CWallmarksEngine::Render()
 		FlushStream(hGeom, slot->shader, w_offset, w_verts, w_start, TRUE);
 	}
 
-	lock.Leave();				// Physics may add wallmarks in parallel with rendering
+	lock.Leave(); // Physics may add wallmarks in parallel with rendering
 
 	// Level-wmarks
 	RImplementation.r_dsgraph_render_wmarks();

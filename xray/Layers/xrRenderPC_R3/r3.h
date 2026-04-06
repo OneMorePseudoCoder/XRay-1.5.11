@@ -5,7 +5,7 @@
 
 #include "../xrRender/PSLibrary.h"
 
-#include "r2_types.h"
+#include "r3_types.h"
 #include "r3_rendertarget.h"
 
 #include "../xrRender/hom.h"

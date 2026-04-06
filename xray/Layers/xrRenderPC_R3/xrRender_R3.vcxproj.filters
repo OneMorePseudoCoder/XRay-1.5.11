@@ -207,7 +207,7 @@
     <ClInclude Include="..\xrRender\QueryHelper.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="r2_types.h">
+    <ClInclude Include="r3_types.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="r3.h">
@@ -770,15 +770,6 @@
     <ClCompile Include="r2_blenders.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="r2_R_calculate.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="r2_R_lights.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
-    <ClCompile Include="r2_R_sun.cpp">
-      <Filter>Core</Filter>
-    </ClCompile>
     <ClCompile Include="r2_sector_detect.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -1339,6 +1330,15 @@
     </ClCompile>
     <ClCompile Include="..\xrRender\Debug\dxPixEventWrapper.cpp">
       <Filter>Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="r3_R_lights.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="r3_R_sun.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xrRender\r__R_calculate.cpp">
+      <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Editor\EditMesh.cpp">
       <Filter>Models\Editor</Filter>
