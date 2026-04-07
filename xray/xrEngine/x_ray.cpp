@@ -514,7 +514,7 @@ int APIENTRY WinMain_impl(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lp
 
 	// Check for another instance
 #ifdef NO_MULTI_INSTANCES
-	#define STALKER_PRESENCE_MUTEX "STALKER-SoC"
+	#define STALKER_PRESENCE_MUTEX "STALKER-CS"
 	
 	HANDLE hCheckPresenceMutex = INVALID_HANDLE_VALUE;
 	hCheckPresenceMutex = OpenMutex(READ_CONTROL, FALSE, STALKER_PRESENCE_MUTEX);
@@ -700,7 +700,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lpCmdLi
 
 LPCSTR _GetFontTexName (LPCSTR section)
 {
-	static char* tex_names[] = {"texture800", "texture", "texture1600"};
+	static char* tex_names[] = { "texture800", "texture", "texture1600" };
 	int def_idx = 1;
 	int idx = def_idx;
 
@@ -794,12 +794,11 @@ CApplication::~CApplication()
 	Device.seqFrame.Remove(&SoundProcessor);
 	Device.seqFrame.Remove(this);
 
-
 	// events
 	Engine.Event.Handler_Detach(eConsole, this);
 	Engine.Event.Handler_Detach(eDisconnect, this);
 	Engine.Event.Handler_Detach(eStartLoad, this);
-	Engine.Event.Handler_Detach(eStart,t his);
+	Engine.Event.Handler_Detach(eStart, this);
 	Engine.Event.Handler_Detach(eQuit, this);
 }
 

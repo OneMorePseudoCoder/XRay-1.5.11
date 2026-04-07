@@ -488,7 +488,7 @@ void CHW::updateWindowProps(HWND m_hWnd)
 
 			if (fillDesktop)
 				SetWindowLong(m_hWnd, GWL_STYLE, dwWindowStyle = (WS_POPUP | WS_VISIBLE));
-			else if (strstr(Core.Params,"-no_dialog_header"))
+			else if (strstr(Core.Params, "-no_dialog_header"))
 				SetWindowLong(m_hWnd, GWL_STYLE, dwWindowStyle = (WS_BORDER|WS_VISIBLE));
 			else
 				SetWindowLong(m_hWnd, GWL_STYLE, dwWindowStyle = (WS_BORDER | WS_DLGFRAME | WS_VISIBLE | WS_SYSMENU | WS_MINIMIZEBOX));
@@ -503,7 +503,6 @@ void CHW::updateWindowProps(HWND m_hWnd)
 			// desktop.
 
 			RECT m_rcWindowBounds;
-			RECT DesktopRect;
 				
 			GetClientRect(GetDesktopWindow(), &DesktopRect);
 
