@@ -96,7 +96,6 @@ void CRender::create()
 	L_Dynamic = xr_new<CLightR_Manager>();
 	PSLibrary.OnCreate();
 
-	xrRender_apply_tf();
 	::PortalTraverser.initialize();
 }
 
@@ -128,8 +127,6 @@ void CRender::reset_begin()
 
 void CRender::reset_end()
 {
-	xrRender_apply_tf();
-
 	Target = xr_new<CRenderTarget>();
 
 	// KD: let's reload details while changed details options on vid_restart
