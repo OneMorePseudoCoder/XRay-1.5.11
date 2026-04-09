@@ -806,7 +806,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="r2.cpp" />
-    <ClCompile Include="r2_blenders.cpp" />
+    <ClCompile Include="..\xrRender\r__blenders.cpp" />
     <ClCompile Include="..\xrRender\r__loader.cpp" />
     <ClCompile Include="..\xrRender\GlowManager.cpp" />
     <ClCompile Include="r2_rendertarget.cpp">

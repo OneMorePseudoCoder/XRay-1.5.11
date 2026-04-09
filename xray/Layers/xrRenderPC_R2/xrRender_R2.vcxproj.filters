@@ -686,7 +686,7 @@
     <ClCompile Include="r2.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="r2_blenders.cpp">
+    <ClCompile Include="..\xrRender\r__blenders.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\xrRender\r__loader.cpp">

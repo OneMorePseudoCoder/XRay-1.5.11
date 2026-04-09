@@ -726,6 +726,7 @@
     <ClCompile Include="..\xrRender\r__sector.cpp" />
     <ClCompile Include="..\xrRender\r__sector_traversal.cpp" />
     <ClCompile Include="..\xrRender\r__loader.cpp" />
+    <ClCompile Include="..\xrRender\r__blenders.cpp" />
     <ClCompile Include="..\xrRender\GlowManager.cpp" />
     <ClCompile Include="..\xrRender\Shader.cpp" />
     <ClCompile Include="..\xrRender\SH_Atomic.cpp" />
@@ -756,7 +757,6 @@
     <ClCompile Include="Blender_Vertex.cpp" />
     <ClCompile Include="Blender_Vertex_aref.cpp" />
     <ClCompile Include="FStaticRender.cpp" />
-    <ClCompile Include="FStaticRender_Blenders.cpp" />
     <ClCompile Include="FStaticRender_DetectSector.cpp" />
     <ClCompile Include="FStaticRender_RenderTarget.cpp" />
     <ClCompile Include="LightPPA.cpp" />
