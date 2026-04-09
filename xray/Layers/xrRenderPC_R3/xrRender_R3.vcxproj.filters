@@ -770,10 +770,10 @@
     <ClCompile Include="..\xrRender\PSLibrary.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="r2_sector_detect.cpp">
+    <ClCompile Include="..\xrRender\r__sector_detect.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="r2_test_hw.cpp">
+    <ClCompile Include="r3_test_hw.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="r3.cpp">
@@ -1340,7 +1340,7 @@
     <ClCompile Include="r3_R_sun.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\xrRender\r__R_calculate.cpp">
+    <ClCompile Include="..\xrRender\r__calculate.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Editor\EditMesh.cpp">

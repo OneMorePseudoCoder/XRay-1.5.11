@@ -721,9 +721,10 @@
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Mixed|x64'">AssemblyAndSourceCode</AssemblerOutput>
     </ClCompile>
-    <ClCompile Include="..\xrRender\r__R_calculate.cpp" />
+    <ClCompile Include="..\xrRender\r__calculate.cpp" />
     <ClCompile Include="..\xrRender\r__screenshot.cpp" />
     <ClCompile Include="..\xrRender\r__sector.cpp" />
+    <ClCompile Include="..\xrRender\r__sector_detect.cpp" />
     <ClCompile Include="..\xrRender\r__sector_traversal.cpp" />
     <ClCompile Include="..\xrRender\r__loader.cpp" />
     <ClCompile Include="..\xrRender\r__blenders.cpp" />
@@ -757,7 +758,6 @@
     <ClCompile Include="Blender_Vertex.cpp" />
     <ClCompile Include="Blender_Vertex_aref.cpp" />
     <ClCompile Include="FStaticRender.cpp" />
-    <ClCompile Include="FStaticRender_DetectSector.cpp" />
     <ClCompile Include="FStaticRender_RenderTarget.cpp" />
     <ClCompile Include="LightPPA.cpp" />
     <ClCompile Include="LightProjector.cpp" />

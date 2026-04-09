@@ -644,7 +644,7 @@
     <ClCompile Include="FStaticRender.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="FStaticRender_DetectSector.cpp">
+    <ClCompile Include="..\xrRender\r__sector_detect.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\xrRender\r__loader.cpp">
@@ -1028,7 +1028,7 @@
     <ClCompile Include="..\xrRender\xr_effgamma.cpp">
       <Filter>Refactored\Execution &amp; 3D\Gamma</Filter>
     </ClCompile>
-    <ClCompile Include="..\xrRender\r__R_calculate.cpp">
+    <ClCompile Include="..\xrRender\r__calculate.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="..\Editor\EditObjectIO.cpp">
