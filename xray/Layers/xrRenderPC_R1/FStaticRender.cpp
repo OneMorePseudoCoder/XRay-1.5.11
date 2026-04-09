@@ -83,9 +83,9 @@ void CRender::create()
 	m_skinning = -1;
 
 	// disasm
-	o.disasm = (strstr(Core.Params,"-disasm")) ? TRUE : FALSE;
-	o.forceskinw = (strstr(Core.Params,"-skinw")) ? TRUE : FALSE;
-	o.no_detail_textures = ps_r2_ls_flags.test(R1FLAG_NO_DETAIL_TEXTURES);
+	o.disasm = (strstr(Core.Params, "-disasm")) ? TRUE : FALSE;
+	o.forceskinw = (strstr(Core.Params, "-skinw")) ? TRUE : FALSE;
+	o.detail_textures = ps_r1_flags.test(R1FLAG_DETAIL_TEXTURES);
 	c_ldynamic_props = "L_dynamic_props";
 
 	m_bMakeAsyncSS = false;
@@ -494,7 +494,7 @@ void CRender::Render()
 	PortalTraverser.fade_render();				// faded-portals
 	r_dsgraph_render_sorted();				// strict-sorted geoms
 
-	if (L_Glows)
+	if (L_Glows && ps_common_flags.test(RFLAG_GLOWS))
 		L_Glows->Render();				// glows
 
 	g_pGamePersistent->Environment().RenderFlares();				// lens-flares

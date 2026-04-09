@@ -17,23 +17,6 @@
 
 CRender RImplementation;
 
-//////////////////////////////////////////////////////////////////////////
-class CGlow : public IRender_Glow
-{
-public:
-	bool bActive;
-public:
-	CGlow() : bActive(false) {}
-	virtual void set_active(bool b) { bActive = b; }
-	virtual bool get_active() { return bActive; }
-	virtual void set_position(const Fvector& P) {}
-	virtual void set_direction(const Fvector& D) {}
-	virtual void set_radius(float R) {}
-	virtual void set_texture(LPCSTR name) {}
-	virtual void set_color(const Fcolor& C) {}
-	virtual void set_color(float r, float g, float b) {}
-};
-
 float r_dtex_range = 50.f;
 
 ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual *pVisual, float cdist_sq)
@@ -606,7 +589,7 @@ D3DVERTEXELEMENT9* CRender::getVB_Format(int id, BOOL _alt)
 	}
 }
 
-ID3DVertexBuffer* CRender::getVB (int id, BOOL _alt)
+ID3DVertexBuffer* CRender::getVB(int id, BOOL _alt)
 {
 	if (_alt)
 	{ 
@@ -815,289 +798,332 @@ void CRender::Statistics(CGameFont* _F)
 #pragma comment(lib, "d3dx9.lib")
 HRESULT	CRender::shader_compile(LPCSTR name, LPCSTR pSrcData, UINT SrcDataLen, void* _pDefines, void* _pInclude, LPCSTR pFunctionName, LPCSTR pTarget, DWORD Flags, void* _ppShader, void* _ppErrorMsgs, void* _ppConstantTable)
 {
-	D3D_SHADER_MACRO				defines[128];
-	int								def_it = 0;
-	CONST D3D_SHADER_MACRO*         pDefines = (CONST D3D_SHADER_MACRO*)_pDefines;
-	char							c_smapsize[32];
-	char							c_gloss[32];
-	char							c_sun_shafts[32];
-	char							c_ssao[32];
-	char							c_sun_quality[32];
+	D3D_SHADER_MACRO defines[128];
+	int def_it = 0;
+	CONST D3D_SHADER_MACRO* pDefines = (CONST D3D_SHADER_MACRO*)_pDefines;
+	char c_smapsize[32];
+	char c_gloss[32];
+	char c_sun_shafts[32];
+	char c_ssao[32];
+	char c_sun_quality[32];
 
-	if (pDefines)	{
+	if (pDefines)	
+	{
 		// transfer existing defines
-		for (;;def_it++)	{
-			if (0==pDefines[def_it].Name)	break;
-			defines[def_it]			= pDefines[def_it];
+		for (;; def_it++)	
+		{
+			if (0 == pDefines[def_it].Name)
+				break;
+			defines[def_it] = pDefines[def_it];
 		}
 	}
+
 	// options
 	{
-		sprintf						(c_smapsize,"%d",u32(o.smapsize));
-		defines[def_it].Name		=	"SMAP_size";
-		defines[def_it].Definition	=	c_smapsize;
-		def_it						++	;
+		sprintf(c_smapsize, "%d", u32(o.smapsize));
+		defines[def_it].Name = "SMAP_size";
+		defines[def_it].Definition = c_smapsize;
+		def_it++;
 	}
-	if (o.fp16_filter)		{
-		defines[def_it].Name		=	"FP16_FILTER";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.fp16_filter)		
+	{
+		defines[def_it].Name = "FP16_FILTER";
+		defines[def_it].Definition = "1";
+        def_it++;
 	}
-	if (o.fp16_blend)		{
-		defines[def_it].Name		=	"FP16_BLEND";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.fp16_blend)		
+	{
+		defines[def_it].Name = "FP16_BLEND";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (o.HW_smap)			{
-		defines[def_it].Name		=	"USE_HWSMAP";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.HW_smap)			
+	{
+		defines[def_it].Name = "USE_HWSMAP";
+		defines[def_it].Definition = "1";
+        def_it++;
 	}
-	if (o.HW_smap_PCF)			{
-		defines[def_it].Name		=	"USE_HWSMAP_PCF";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.HW_smap_PCF)			
+	{
+		defines[def_it].Name = "USE_HWSMAP_PCF";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (o.HW_smap_FETCH4)			{
-		defines[def_it].Name		=	"USE_FETCH4";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.HW_smap_FETCH4)			
+	{
+		defines[def_it].Name = "USE_FETCH4";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (o.sjitter)			{
-		defines[def_it].Name		=	"USE_SJITTER";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.sjitter)			
+	{
+		defines[def_it].Name = "USE_SJITTER";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (HW.Caps.raster_major >= 3)	{
-		defines[def_it].Name		=	"USE_BRANCHING";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (HW.Caps.raster_major >= 3)	
+	{
+		defines[def_it].Name = "USE_BRANCHING";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (HW.Caps.geometry.bVTF)	{
-		defines[def_it].Name		=	"USE_VTF";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (HW.Caps.geometry.bVTF)	
+	{
+		defines[def_it].Name = "USE_VTF";
+		defines[def_it].Definition	= "1";
+		def_it++;
 	}
-	if (o.Tshadows)			{
-		defines[def_it].Name		=	"USE_TSHADOWS";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.Tshadows)			
+	{
+		defines[def_it].Name = "USE_TSHADOWS";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (o.mblur)			{
-		defines[def_it].Name		=	"USE_MBLUR";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.mblur)			
+	{
+		defines[def_it].Name = "USE_MBLUR";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (o.sunfilter)		{
-		defines[def_it].Name		=	"USE_SUNFILTER";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.sunfilter)		
+	{
+		defines[def_it].Name = "USE_SUNFILTER";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (o.sunstatic)		{
-		defines[def_it].Name		=	"USE_R2_STATIC_SUN";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+
+	if (o.sunstatic)		
+	{
+		defines[def_it].Name = "USE_R2_STATIC_SUN";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (o.forcegloss)		{
-		sprintf						(c_gloss,"%f",o.forcegloss_v);
-		defines[def_it].Name		=	"FORCE_GLOSS";
-		defines[def_it].Definition	=	c_gloss;
-		def_it						++	;
+
+	if (o.forcegloss)		
+	{
+		sprintf(c_gloss, "%f", o.forcegloss_v);
+		defines[def_it].Name = "FORCE_GLOSS";
+		defines[def_it].Definition = c_gloss;
+		def_it++;
 	}
-	if (o.forceskinw)		{
-		defines[def_it].Name		=	"SKIN_COLOR";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+
+	if (o.forceskinw)		
+	{
+		defines[def_it].Name = "SKIN_COLOR";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
 
 	if (o.ssao_blur_on)
 	{
-		defines[def_it].Name		=	"USE_SSAO_BLUR";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+		defines[def_it].Name = "USE_SSAO_BLUR";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
 
 	if (o.ssao_opt_data)
 	{
-		defines[def_it].Name		=	"SSAO_OPT_DATA";
+		defines[def_it].Name = "SSAO_OPT_DATA";
 		if (o.ssao_half_data)
-			defines[def_it].Definition	=	"2";
+			defines[def_it].Definition = "2";
 		else
-			defines[def_it].Definition	=	"1";
-		def_it						++;
+			defines[def_it].Definition = "1";
+		def_it++;
 	}
 
 	if (o.ssao_hdao)
 	{
-		defines[def_it].Name		=	"HDAO";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+		defines[def_it].Name = "HDAO";
+		defines[def_it].Definition= "1";
+		def_it++;
 	}
 
 	if (o.ssao_hbao)
 	{
-		defines[def_it].Name		=	"USE_HBAO";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+		defines[def_it].Name = "USE_HBAO";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
 
-	if( o.dx10_msaa )
+	if (o.dx10_msaa)
 	{
-		static char def[ 256 ];
-      if( m_MSAASample < 0 )
-         def[0]= '0';
-      else
-		   def[0]= '0' + char(m_MSAASample);
-      def[1] = 0;
-		defines[def_it].Name		=	"ISAMPLE";
-		defines[def_it].Definition	=	def;
-		def_it						++	;
+		static char def[256];
+		if (m_MSAASample < 0)
+			def[0] = '0';
+		else
+			def[0] = '0' + char(m_MSAASample);
+		def[1] = 0;
+		defines[def_it].Name = "ISAMPLE";
+		defines[def_it].Definition = def;
+		def_it++;
 	}
 
 	// skinning
-	if (m_skinning<0)		{
-		defines[def_it].Name		=	"SKIN_NONE";
-		defines[def_it].Definition	=	"1";
-		def_it						++	;
+	if (m_skinning < 0)		
+	{
+		defines[def_it].Name= "SKIN_NONE";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (0==m_skinning)		{
-		defines[def_it].Name		=	"SKIN_0";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+
+	if (0 == m_skinning)		
+	{
+		defines[def_it].Name = "SKIN_0";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (1==m_skinning)		{
-		defines[def_it].Name		=	"SKIN_1";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+
+	if (1 == m_skinning)		
+	{
+		defines[def_it].Name = "SKIN_1";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (2==m_skinning)		{
-		defines[def_it].Name		=	"SKIN_2";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+
+	if (2 == m_skinning)		
+	{
+		defines[def_it].Name = "SKIN_2";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (3==m_skinning)		{
-		defines[def_it].Name		=	"SKIN_3";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+
+	if (3 == m_skinning)		
+	{
+		defines[def_it].Name = "SKIN_3";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
-	if (4==m_skinning)		{
-		defines[def_it].Name		=	"SKIN_4";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+
+	if (4 == m_skinning)		
+	{
+		defines[def_it].Name = "SKIN_4";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
 
 	//	Igor: need restart options
 	if (RImplementation.o.advancedpp && ps_r2_ls_flags.test(R2FLAG_SOFT_WATER))
 	{
-		defines[def_it].Name		=	"USE_SOFT_WATER";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+		defines[def_it].Name = "USE_SOFT_WATER";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
 
 	if (RImplementation.o.advancedpp && ps_r2_ls_flags.test(R2FLAG_SOFT_PARTICLES))
 	{
-		defines[def_it].Name		=	"USE_SOFT_PARTICLES";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+		defines[def_it].Name = "USE_SOFT_PARTICLES";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
 
 	if (RImplementation.o.advancedpp && ps_r2_ls_flags.test(R2FLAG_DOF))
 	{
-		defines[def_it].Name		=	"USE_DOF";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+		defines[def_it].Name = "USE_DOF";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
 
 	if (RImplementation.o.advancedpp && ps_r_sun_shafts)
 	{
-		sprintf_s					(c_sun_shafts,"%d",ps_r_sun_shafts);
-		defines[def_it].Name		=	"SUN_SHAFTS_QUALITY";
-		defines[def_it].Definition	=	c_sun_shafts;
-		def_it						++;
+		sprintf_s(c_sun_shafts, "%d", ps_r_sun_shafts);
+		defines[def_it].Name = "SUN_SHAFTS_QUALITY";
+		defines[def_it].Definition = c_sun_shafts;
+		def_it++;
 	}
 
 	if (RImplementation.o.advancedpp && ps_r_ssao)
 	{
-		sprintf_s					(c_ssao,"%d",ps_r_ssao);
-		defines[def_it].Name		=	"SSAO_QUALITY";
-		defines[def_it].Definition	=	c_ssao;
-		def_it						++;
+		sprintf_s(c_ssao, "%d", ps_r_ssao);
+		defines[def_it].Name = "SSAO_QUALITY";
+		defines[def_it].Definition = c_ssao;
+		def_it++;
 	}
 
 	if (RImplementation.o.advancedpp && ps_r_sun_quality)
 	{
-		sprintf_s					(c_sun_quality,"%d",ps_r_sun_quality);
-		defines[def_it].Name		=	"SUN_QUALITY";
-		defines[def_it].Definition	=	c_sun_quality;
-		def_it						++;
+		sprintf_s(c_sun_quality, "%d", ps_r_sun_quality);
+		defines[def_it].Name = "SUN_QUALITY";
+		defines[def_it].Definition = c_sun_quality;
+		def_it++;
 	}
 
 	if (RImplementation.o.advancedpp && ps_r2_ls_flags.test(R2FLAG_STEEP_PARALLAX))
 	{
-		defines[def_it].Name		=	"ALLOW_STEEPPARALLAX";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+		defines[def_it].Name = "ALLOW_STEEPPARALLAX";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
 
-   if( o.dx10_gbuffer_opt )
+	if (o.dx10_gbuffer_opt)
 	{
-		defines[def_it].Name		=	"GBUFFER_OPTIMIZATION";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
+		defines[def_it].Name = "GBUFFER_OPTIMIZATION";
+		defines[def_it].Definition = "1";
+		def_it++;
 	}
 
-   if( o.dx10_sm4_1 )
+   if (o.dx10_sm4_1)
    {
-	   defines[def_it].Name		=	"SM_4_1";
-	   defines[def_it].Definition	=	"1";
+	   defines[def_it].Name = "SM_4_1";
+	   defines[def_it].Definition = "1";
 	   def_it++;
    }
 
    if (o.dx10_minmax_sm)
    {
-	   defines[def_it].Name		=	"USE_MINMAX_SM";
-	   defines[def_it].Definition	=	"1";
+	   defines[def_it].Name = "USE_MINMAX_SM";
+	   defines[def_it].Definition = "1";
 	   def_it++;
    }
 
 	// add a #define for DX10_1 MSAA support
-   if( o.dx10_msaa )
+   if (o.dx10_msaa)
    {
 	   static char samples[2];
 
-	   defines[def_it].Name		=	"USE_MSAA";
-	   defines[def_it].Definition	=	"1";
-	   def_it						++;
+	   defines[def_it].Name = "USE_MSAA";
+	   defines[def_it].Definition = "1";
+	   def_it++;
 
-	   defines[def_it].Name		=	"MSAA_SAMPLES";
+	   defines[def_it].Name = "MSAA_SAMPLES";
 	   samples[0] = char(o.dx10_msaa_samples) + '0';
 	   samples[1] = 0;
-	   defines[def_it].Definition	= samples;	
-	   def_it						++;
+	   defines[def_it].Definition = samples;	
+	   def_it++;
 
-	   if( o.dx10_msaa_opt )
+	   if (o.dx10_msaa_opt)
 	   {
-		   defines[def_it].Name		=	"MSAA_OPTIMIZATION";
-		   defines[def_it].Definition	=	"1";
-		   def_it						++;
+		   defines[def_it].Name = "MSAA_OPTIMIZATION";
+		   defines[def_it].Definition = "1";
+		   def_it++;
 	   }
 
-		switch(o.dx10_msaa_alphatest)
+		switch (o.dx10_msaa_alphatest)
 		{
 		case MSAA_ATEST_DX10_0_ATOC:
-			defines[def_it].Name		=	"MSAA_ALPHATEST_DX10_0_ATOC";
-			defines[def_it].Definition	=	"1";
-			def_it						++;
+			defines[def_it].Name = "MSAA_ALPHATEST_DX10_0_ATOC";
+			defines[def_it].Definition = "1";
+			def_it++;
 			break;
 		case MSAA_ATEST_DX10_1_ATOC:
-			defines[def_it].Name		=	"MSAA_ALPHATEST_DX10_1_ATOC";
-			defines[def_it].Definition	=	"1";
-			def_it						++;
+			defines[def_it].Name = "MSAA_ALPHATEST_DX10_1_ATOC";
+			defines[def_it].Definition = "1";
+			def_it++;
 			break;
 		case MSAA_ATEST_DX10_1_NATIVE:
-			defines[def_it].Name		=	"MSAA_ALPHATEST_DX10_1";
-			defines[def_it].Definition	=	"1";
-			def_it						++;
+			defines[def_it].Name = "MSAA_ALPHATEST_DX10_1";
+			defines[def_it].Definition = "1";
+			def_it++;
 			break;
 		}
    }

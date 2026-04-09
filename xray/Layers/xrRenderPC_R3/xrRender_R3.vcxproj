@@ -548,6 +548,7 @@
     <ClInclude Include="..\xrRender\Light_DB.h" />
     <ClInclude Include="..\xrRender\Light_Package.h" />
     <ClInclude Include="..\xrRender\Light_Render_Direct.h" />
+    <ClInclude Include="..\xrRender\light_smapvis.h" />
     <ClInclude Include="..\xrRender\ModelPool.h" />
     <ClInclude Include="..\xrRender\NvTriStrip.h" />
     <ClInclude Include="..\xrRender\NvTriStripObjects.h" />
@@ -572,6 +573,7 @@
     <ClInclude Include="..\xrRender\r__occlusion.h" />
     <ClInclude Include="..\xrRender\r__pixel_calculator.h" />
     <ClInclude Include="..\xrRender\r__sector.h" />
+    <ClInclude Include="..\xrRender\GlowManager.h" />
     <ClInclude Include="..\xrRender\Shader.h" />
     <ClInclude Include="..\xrRender\SH_Atomic.h" />
     <ClInclude Include="..\xrRender\SH_Constant.h" />
@@ -611,7 +613,6 @@
     <ClInclude Include="dx10MinMaxSMBlender.h" />
     <ClInclude Include="light.h" />
     <ClInclude Include="light_gi.h" />
-    <ClInclude Include="light_smapvis.h" />
     <ClInclude Include="pch\stdafx.h" />
     <ClInclude Include="r3_types.h" />
     <ClInclude Include="r3.h" />
@@ -779,6 +780,7 @@
     <ClCompile Include="..\xrRender\Light_Package.cpp" />
     <ClCompile Include="..\xrRender\Light_Render_Direct.cpp" />
     <ClCompile Include="..\xrRender\Light_Render_Direct_ComputeXFS.cpp" />
+    <ClCompile Include="..\xrRender\light_smapvis.cpp" />
     <ClCompile Include="..\xrRender\ModelPool.cpp" />
     <ClCompile Include="..\xrRender\NvTriStrip.cpp" />
     <ClCompile Include="..\xrRender\NvTriStripObjects.cpp" />
@@ -841,7 +843,6 @@
     <ClCompile Include="blender_ssao.cpp" />
     <ClCompile Include="dx10MinMaxSMBlender.cpp" />
     <ClCompile Include="light_GI.cpp" />
-    <ClCompile Include="light_smapvis.cpp" />
     <ClCompile Include="light_vis.cpp" />
     <ClCompile Include="pch\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -857,7 +858,8 @@
     <ClCompile Include="r2_sector_detect.cpp" />
     <ClCompile Include="r2_test_hw.cpp" />
     <ClCompile Include="r3.cpp" />
-    <ClCompile Include="r3_loader.cpp" />
+    <ClCompile Include="..\xrRender\r__loader.cpp" />
+    <ClCompile Include="..\xrRender\GlowManager.cpp" />
     <ClCompile Include="r3_rendertarget.cpp" />
     <ClCompile Include="r3_rendertarget_accum_direct.cpp" />
     <ClCompile Include="r3_rendertarget_accum_omnipart_geom.cpp" />

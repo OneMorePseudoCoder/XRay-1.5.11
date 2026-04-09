@@ -6,141 +6,155 @@
 #include "../xrRender/QueryHelper.h"
 #include "../../xrEngine/Environment.h"
 
-IC	bool	pred_sp_sort	(ISpatial*	_1, ISpatial* _2)
+IC bool pred_sp_sort(ISpatial* _1, ISpatial* _2)
 {
-	float	d1		= _1->spatial.sphere.P.distance_to_sqr	(Device.vCameraPosition);
-	float	d2		= _2->spatial.sphere.P.distance_to_sqr	(Device.vCameraPosition);
-	return	d1<d2	;
+	float d1 = _1->spatial.sphere.P.distance_to_sqr(Device.vCameraPosition);
+	float d2 = _2->spatial.sphere.P.distance_to_sqr(Device.vCameraPosition);
+	return d1 < d2;
 }
 
-void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
+void CRender::render_main(Fmatrix& m_ViewProjection, bool _fportals)
 {
 	PIX_EVENT(render_main);
-//	Msg						("---begin");
-	marker					++;
+	marker++;
 
 	// Calculate sector(s) and their objects
-	if (pLastSector)		{
-		//!!!
-		//!!! BECAUSE OF PARALLEL HOM RENDERING TRY TO DELAY ACCESS TO HOM AS MUCH AS POSSIBLE
-		//!!!
+	if (pLastSector)		
+	{
 		{
 			// Traverse object database
-			g_SpatialSpace->q_frustum
-				(
-				lstRenderables,
-				ISpatial_DB::O_ORDERED,
-				STYPE_RENDERABLE + STYPE_LIGHTSOURCE,
-				ViewBase
-				);
+			g_SpatialSpace->q_frustum(lstRenderables, ISpatial_DB::O_ORDERED, STYPE_RENDERABLE + STYPE_LIGHTSOURCE, ViewBase);
 
 			// (almost) Exact sorting order (front-to-back)
-			std::sort			(lstRenderables.begin(),lstRenderables.end(),pred_sp_sort);
+			std::sort(lstRenderables.begin(), lstRenderables.end(), pred_sp_sort);
 
 			// Determine visibility for dynamic part of scene
-			set_Object							(0);
-			u32 uID_LTRACK						= 0xffffffff;
-			if (phase==PHASE_NORMAL)			{
-				uLastLTRACK	++;
-				if (lstRenderables.size())		uID_LTRACK	= uLastLTRACK%lstRenderables.size();
+			set_Object(0);
+			u32 uID_LTRACK = 0xffffffff;
+			if (phase == PHASE_NORMAL)			
+			{
+				uLastLTRACK++;
+				if (lstRenderables.size())
+					uID_LTRACK = uLastLTRACK%lstRenderables.size();
 
 				// update light-vis for current entity / actor
-				CObject*	O					= g_pGameLevel->CurrentViewEntity();
-				if (O)		{
-					CROS_impl*	R					= (CROS_impl*) O->ROS();
-					if (R)		R->update			(O);
+				CObject* O = g_pGameLevel->CurrentViewEntity();
+				if (O)		
+				{
+					CROS_impl* R = (CROS_impl*)O->ROS();
+					if (R)
+						R->update(O);
 				}
 
 				// update light-vis for selected entity
 				// track lighting environment
-				if (lstRenderables.size())		{
-					IRenderable*	renderable		= lstRenderables[uID_LTRACK]->dcast_Renderable	();
-					if (renderable)	{
-						CROS_impl*		T = (CROS_impl*)renderable->renderable_ROS	();
-						if (T)			T->update	(renderable);
+				if (lstRenderables.size())		
+				{
+					IRenderable* renderable = lstRenderables[uID_LTRACK]->dcast_Renderable();
+					if (renderable)	
+					{
+						CROS_impl* T = (CROS_impl*)renderable->renderable_ROS();
+						if (T)
+							T->update(renderable);
 					}
 				}
 			}
 		}
 
 		// Traverse sector/portal structure
-		PortalTraverser.traverse	
-			(
-			pLastSector,
-			ViewBase,
-			Device.vCameraPosition,
-			m_ViewProjection,
-			CPortalTraverser::VQ_HOM + CPortalTraverser::VQ_SSA + CPortalTraverser::VQ_FADE
-			//. disabled scissoring (HW.Caps.bScissor?CPortalTraverser::VQ_SCISSOR:0)	// generate scissoring info
-			);
+		PortalTraverser.traverse(pLastSector, ViewBase, Device.vCameraPosition, m_ViewProjection, CPortalTraverser::VQ_HOM + CPortalTraverser::VQ_SSA + CPortalTraverser::VQ_FADE);
 
 		// Determine visibility for static geometry hierrarhy
-		for (u32 s_it=0; s_it<PortalTraverser.r_sectors.size(); s_it++)
+		for (u32 s_it = 0; s_it < PortalTraverser.r_sectors.size(); s_it++)
 		{
-			CSector*	sector		= (CSector*)PortalTraverser.r_sectors[s_it];
-			dxRender_Visual*	root	= sector->root();
-			for (u32 v_it=0; v_it<sector->r_frustums.size(); v_it++)	{
-				set_Frustum			(&(sector->r_frustums[v_it]));
-				add_Geometry		(root);
+			CSector* sector = (CSector*)PortalTraverser.r_sectors[s_it];
+			dxRender_Visual* root = sector->root();
+			for (u32 v_it = 0; v_it < sector->r_frustums.size(); v_it++)	
+			{
+				set_Frustum(&(sector->r_frustums[v_it]));
+				add_Geometry(root);
 			}
 		}
 
 		// Traverse frustums
-		for (u32 o_it=0; o_it<lstRenderables.size(); o_it++)
+		for (u32 o_it = 0; o_it < lstRenderables.size(); o_it++)
 		{
-			ISpatial*	spatial		= lstRenderables[o_it];		spatial->spatial_updatesector	();
-			CSector*	sector		= (CSector*)spatial->spatial.sector;
-			if	(0==sector)										continue;	// disassociated from S/P structure
+			ISpatial* spatial = lstRenderables[o_it];
+			spatial->spatial_updatesector();
+			CSector* sector = (CSector*)spatial->spatial.sector;
+			if	(0 == sector)
+				continue;	// disassociated from S/P structure
 
-			if (spatial->spatial.type & STYPE_LIGHTSOURCE)		{
+			if (spatial->spatial.type & STYPE_LIGHTSOURCE)		
+			{
 				// lightsource
-				light*			L				= (light*)	(spatial->dcast_Light());
-				VERIFY							(L);
-				float	lod		= L->get_LOD	();
-				if (lod>EPS_L)	{
-					vis_data&		vis		= L->get_homdata	( );
-					if	(HOM.visible(vis))	Lights.add_light	(L);
+				light* L = (light*)(spatial->dcast_Light());
+				VERIFY(L);
+				float lod = L->get_LOD();
+				if (lod > EPS_L)	
+				{
+					vis_data& vis = L->get_homdata();
+					if	(HOM.visible(vis))
+						Lights.add_light(L);
 				}
-				continue					;
+				continue;
 			}
 
-			if	(PortalTraverser.i_marker != sector->r_marker)	continue;	// inactive (untouched) sector
-			for (u32 v_it=0; v_it<sector->r_frustums.size(); v_it++)	{
-				CFrustum&	view	= sector->r_frustums[v_it];
-				if (!view.testSphere_dirty(spatial->spatial.sphere.P,spatial->spatial.sphere.R))	continue;
+			if (PortalTraverser.i_marker != sector->r_marker)
+				continue;	// inactive (untouched) sector
 
-				if (spatial->spatial.type & STYPE_RENDERABLE)
+			for (u32 v_it = 0; v_it < sector->r_frustums.size(); v_it++)	
+			{
+				CFrustum& view = sector->r_frustums[v_it];
+				if (!view.testSphere_dirty(spatial->spatial.sphere.P, spatial->spatial.sphere.R))
+					continue;
+
+				if (spatial->spatial.type & STYPE_RENDERABLE) 
 				{
 					// renderable
-					IRenderable*	renderable		= spatial->dcast_Renderable	();
-					VERIFY							(renderable);
+					IRenderable* renderable = spatial->dcast_Renderable();
+					VERIFY(renderable);
 
-					// Occlusion
-					//	casting is faster then using getVis method
-					vis_data&		v_orig			= ((dxRender_Visual*)renderable->renderable.visual)->vis;
-					vis_data		v_copy			= v_orig;
-					v_copy.box.xform				(renderable->renderable.xform);
-					BOOL			bVisible		= HOM.visible(v_copy);
-					v_orig.marker					= v_copy.marker;
-					v_orig.accept_frame				= v_copy.accept_frame;
-					v_orig.hom_frame				= v_copy.hom_frame;
-					v_orig.hom_tested				= v_copy.hom_tested;
-					if (!bVisible)					break;	// exit loop on frustums
+					// ZergO
+					if (0 == renderable) 
+					{
+						// It may be an glow
+						CGlow* glow = dynamic_cast<CGlow*>(spatial);
+						VERIFY(glow);
+						L_Glows->add(glow);
+                    }
+					else
+					{
+						// Occlusion
+						// casting is faster then using getVis method
+						vis_data& v_orig = ((dxRender_Visual*)renderable->renderable.visual)->vis;
+						vis_data v_copy = v_orig;
+						v_copy.box.xform(renderable->renderable.xform);
+						BOOL bVisible = HOM.visible(v_copy);
+						v_orig.marker = v_copy.marker;
+						v_orig.accept_frame = v_copy.accept_frame;
+						v_orig.hom_frame = v_copy.hom_frame;
+						v_orig.hom_tested = v_copy.hom_tested;
+						if (!bVisible)
+						    break; // exit loop on frustums
 
-					// Rendering
-					set_Object						(renderable);
-					renderable->renderable_Render	();
-					set_Object						(0);
-				}
+						// Rendering
+						set_Object(renderable);
+						renderable->renderable_Render();
+						set_Object(0);
+					}
+                }
 				break;	// exit loop on frustums
 			}
 		}
-		if (g_pGameLevel && (phase==PHASE_NORMAL))	g_pGameLevel->pHUD->Render_Last();		// HUD
+		if (g_pGameLevel && (phase == PHASE_NORMAL))
+			g_pGameLevel->pHUD->Render_Last();		// HUD
 	}
 	else
 	{
-		set_Object									(0);
-		if (g_pGameLevel && (phase==PHASE_NORMAL))	g_pGameLevel->pHUD->Render_Last();		// HUD
+		set_Object(0);
+		if (g_pGameLevel && (phase == PHASE_NORMAL))
+			g_pGameLevel->pHUD->Render_Last();		// HUD
 	}
 }
 
@@ -496,25 +510,27 @@ void CRender::Render		()
 	VERIFY	(0==mapDistort.size());
 }
 
-void CRender::render_forward				()
+void CRender::render_forward()
 {
-	VERIFY	(0==mapDistort.size());
-	RImplementation.o.distortion				= RImplementation.o.distortion_enabled;	// enable distorion
+	VERIFY(0 == mapDistort.size());
+	RImplementation.o.distortion = RImplementation.o.distortion_enabled;	// enable distorion
 
 	//******* Main render - second order geometry (the one, that doesn't support deffering)
 	//.todo: should be done inside "combine" with estimation of of luminance, tone-mapping, etc.
 	{
 		// level
-		r_pmask									(false,true);			// enable priority "1"
-		phase									= PHASE_NORMAL;
-		render_main								(Device.mFullTransform,false);//
+		r_pmask(false, true);			// enable priority "1"
+		phase = PHASE_NORMAL;
+		render_main(Device.mFullTransform, false);//
 		//	Igor: we don't want to render old lods on next frame.
-		mapLOD.clear							();
-		r_dsgraph_render_graph					(1)	;					// normal level, secondary priority
-		PortalTraverser.fade_render				()	;					// faded-portals
-		r_dsgraph_render_sorted					()	;					// strict-sorted geoms
-		g_pGamePersistent->Environment().RenderLast()	;					// rain/thunder-bolts
+		mapLOD.clear();
+		r_dsgraph_render_graph(1);					// normal level, secondary priority
+		PortalTraverser.fade_render();					// faded-portals
+		r_dsgraph_render_sorted();					// strict-sorted geoms
+		if (L_Glows && ps_common_flags.test(RFLAG_GLOWS))
+			L_Glows->Render(); // glows - ZergO
+		g_pGamePersistent->Environment().RenderLast();					// rain/thunder-bolts
 	}
 
-	RImplementation.o.distortion				= FALSE;				// disable distorion
+	RImplementation.o.distortion = FALSE;				// disable distorion
 }
