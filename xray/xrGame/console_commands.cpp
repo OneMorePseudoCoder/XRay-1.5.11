@@ -332,23 +332,30 @@ public:
 class CCC_DemoRecord : public IConsole_Command
 {
 public:
-
 	CCC_DemoRecord(LPCSTR N) : IConsole_Command(N) {};
-	virtual void Execute(LPCSTR args) {
-		#ifndef	DEBUG
+	virtual void Execute(LPCSTR args) 
+	{
+		if (!g_pGameLevel) // level not loaded
+		{
+			Msg("Demo Record is disabled when level is not loaded.");
+			return;
+		}
+#ifndef	DEBUG
 		if (GameID() != eGameIDSingle) 
 		{
 			Msg("For this game type Demo Record is disabled.");
 			return;
 		};
-		#endif
-		Console->Hide	();
-		string_path		fn_; 
-		strconcat		(sizeof(fn_),fn_, args, ".xrdemo");
-		string_path		fn;
-		FS.update_path	(fn, "$game_saves$", fn_);
+#endif
+		Console->Hide();
+		if (MainMenu()->IsActive())
+			MainMenu()->Activate(false); // close main menu if it is open
+		string_path fn_; 
+		strconcat(sizeof(fn_),fn_, args, ".xrdemo");
+		string_path fn;
+		FS.update_path(fn, "$game_saves$", fn_);
 
-		g_pGameLevel->Cameras().AddCamEffector(xr_new<CDemoRecord> (fn));
+		g_pGameLevel->Cameras().AddCamEffector(xr_new<CDemoRecord>(fn));
 	}
 };
 
