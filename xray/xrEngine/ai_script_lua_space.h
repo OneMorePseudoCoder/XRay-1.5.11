@@ -1,7 +1,9 @@
 #pragma once
 
-namespace Lua {
-	enum ELuaMessageType {
+namespace Lua 
+{
+	enum ELuaMessageType 
+	{
 		eLuaMessageTypeInfo = u32(0),
 		eLuaMessageTypeError,
 		eLuaMessageTypeMessage,

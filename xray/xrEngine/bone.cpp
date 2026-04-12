@@ -4,44 +4,47 @@
 
 //////////////////////////////////////////////////////////////////////////
 // BoneInstance methods
-void	ENGINE_API	CBoneInstance::construct	()
+void ENGINE_API	CBoneInstance::construct()
 {
-	ZeroMemory					(this,sizeof(*this));
-	mTransform.identity			();
+	ZeroMemory(this, sizeof(*this));
+	mTransform.identity();
 
-	mRenderTransform.identity	();
-	Callback_overwrite			= FALSE;
+	mRenderTransform.identity();
+	Callback_overwrite = FALSE;
 }
-void	ENGINE_API	CBoneInstance::set_callback	(u32 Type, BoneCallback C, void* Param, BOOL overwrite)
+
+void ENGINE_API CBoneInstance::set_callback(u32 Type, BoneCallback C, void* Param, BOOL overwrite)
 {	
-	Callback			= C; 
-	Callback_Param		= Param; 
-	Callback_overwrite	= overwrite;
-	Callback_type		= Type;
-}
-void	ENGINE_API	CBoneInstance::reset_callback()
-{
-	Callback			= 0; 
-	Callback_Param		= 0; 
-	Callback_overwrite	= FALSE;
-	Callback_type		= 0;
+	Callback = C; 
+	Callback_Param = Param; 
+	Callback_overwrite = overwrite;
+	Callback_type = Type;
 }
 
-void	ENGINE_API	CBoneInstance::set_param	(u32 idx, float data)
+void ENGINE_API CBoneInstance::reset_callback()
 {
-	VERIFY		(idx<MAX_BONE_PARAMS);
-	param[idx]	= data;
+	Callback = 0; 
+	Callback_Param = 0; 
+	Callback_overwrite = FALSE;
+	Callback_type = 0;
 }
-float	ENGINE_API	CBoneInstance::get_param	(u32 idx)
+
+void ENGINE_API CBoneInstance::set_param(u32 idx, float data)
 {
-	VERIFY		(idx<MAX_BONE_PARAMS);
-	return		param[idx];
+	VERIFY(idx < MAX_BONE_PARAMS);
+	param[idx] = data;
+}
+
+float ENGINE_API CBoneInstance::get_param(u32 idx)
+{
+	VERIFY(idx < MAX_BONE_PARAMS);
+	return param[idx];
 }
 
 #ifdef	DEBUG
-void ENGINE_API	CBoneData::DebugQuery		(BoneDebug& L)
+void ENGINE_API	CBoneData::DebugQuery(BoneDebug& L)
 {
-	for (u32 i=0; i<children.size(); i++)
+	for (u32 i = 0; i < children.size(); i++)
 	{
 		L.push_back(SelfID);
 		L.push_back(children[i]->SelfID);
@@ -53,27 +56,26 @@ void ENGINE_API	CBoneData::DebugQuery		(BoneDebug& L)
 void ENGINE_API	CBoneData::CalculateM2B(const Fmatrix& parent)
 {
 	// Build matrix
-	m2b_transform.mul_43	(parent,bind_transform);
+	m2b_transform.mul_43(parent, bind_transform);
 
 	// Calculate children
-	for (xr_vector<CBoneData*>::iterator C=children.begin(); C!=children.end(); C++)
-		(*C)->CalculateM2B	(m2b_transform);
+	for (xr_vector<CBoneData*>::iterator C = children.begin(); C != children.end(); C++)
+		(*C)->CalculateM2B(m2b_transform);
 
-	m2b_transform.invert	();            
+	m2b_transform.invert();            
 }
 
-#define BONE_VERSION					0x0002
-//------------------------------------------------------------------------------
-#define BONE_CHUNK_VERSION				0x0001
-#define BONE_CHUNK_DEF					0x0002
-#define BONE_CHUNK_BIND_POSE			0x0003
-#define BONE_CHUNK_MATERIAL				0x0004
-#define BONE_CHUNK_SHAPE				0x0005
-#define BONE_CHUNK_IK_JOINT				0x0006
-#define BONE_CHUNK_MASS					0x0007
-#define BONE_CHUNK_FLAGS				0x0008
-#define BONE_CHUNK_IK_JOINT_BREAK		0x0009
-#define BONE_CHUNK_IK_JOINT_FRICTION	0x0010
+#define BONE_VERSION 0x0002
+#define BONE_CHUNK_VERSION 0x0001
+#define BONE_CHUNK_DEF 0x0002
+#define BONE_CHUNK_BIND_POSE 0x0003
+#define BONE_CHUNK_MATERIAL 0x0004
+#define BONE_CHUNK_SHAPE 0x0005
+#define BONE_CHUNK_IK_JOINT 0x0006
+#define BONE_CHUNK_MASS 0x0007
+#define BONE_CHUNK_FLAGS 0x0008
+#define BONE_CHUNK_IK_JOINT_BREAK 0x0009
+#define BONE_CHUNK_IK_JOINT_FRICTION 0x0010
 
 CBone::CBone()
 {
@@ -86,8 +88,7 @@ CBone::CBone()
 }
 
 CBone::~CBone()
-{
-}
+{}
 
 void CBone::ResetData()
 {
@@ -127,8 +128,10 @@ void CBone::Save(IWriter& F)
 
 void CBone::Load_0(IReader& F)
 {
-	F.r_stringZ(name);        	xr_strlwr(name);
-	F.r_stringZ(parent_name);	xr_strlwr(parent_name);
+	F.r_stringZ(name);
+	xr_strlwr(name);
+	F.r_stringZ(parent_name);
+	xr_strlwr(parent_name);
 	F.r_stringZ(wmap);
 	F.r_fvector3(rest_offset);
 	F.r_fvector3(rest_rotate);
@@ -146,8 +149,10 @@ void CBone::Load_1(IReader& F)
 		return;
 
 	R_ASSERT(F.find_chunk(BONE_CHUNK_DEF));
-	F.r_stringZ(name);			xr_strlwr(name);
-	F.r_stringZ(parent_name);	xr_strlwr(parent_name);
+	F.r_stringZ(name);
+	xr_strlwr(name);
+	F.r_stringZ(parent_name);
+	xr_strlwr(parent_name);
 	F.r_stringZ(wmap);
 
 	R_ASSERT(F.find_chunk(BONE_CHUNK_BIND_POSE));
