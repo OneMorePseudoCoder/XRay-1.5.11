@@ -13,12 +13,10 @@
 #pragma warning(default:4995)
 #include "x_ray.h"
 #include "render.h"
-// must be defined before include of FS_impl.h
 #define INCLUDE_FROM_ENGINE
-#include "../xrCore/FS_impl.h"
 #ifdef INGAME_EDITOR
-#	include "../include/editor/ide.hpp"
-#	include "engine_impl.hpp"
+#include "../include/editor/ide.hpp"
+#include "engine_impl.hpp"
 #endif // #ifdef INGAME_EDITOR
 #include "xrSash.h"
 #include "igame_persistent.h"

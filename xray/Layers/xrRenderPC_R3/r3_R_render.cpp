@@ -245,141 +245,159 @@ void CRender::Render()
 		bSUN = FALSE;
 
 	// HOM
-	ViewBase.CreateFromMatrix					(Device.mFullTransform, FRUSTUM_P_LRTB + FRUSTUM_P_FAR);
-	View										= 0;
-	if (!ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC))	{
-		HOM.Enable									();
-		HOM.Render									(ViewBase);
+	ViewBase.CreateFromMatrix(Device.mFullTransform, FRUSTUM_P_LRTB + FRUSTUM_P_FAR);
+	View = 0;
+	if (!ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC))
+	{
+		HOM.Enable();
+		HOM.Render(ViewBase);
 	}
 
 	//******* Z-prefill calc - DEFERRER RENDERER
 	if (ps_r2_ls_flags.test(R2FLAG_ZFILL))		
 	{
 		PIX_EVENT(DEFER_Z_FILL);
-		Statistic.RenderCALC.Begin			();
-		float		z_distance	= ps_r2_zfill		;
-		Fmatrix		m_zfill, m_project				;
-		m_project.build_projection	(
-			deg2rad(Device.fFOV/* *Device.fASPECT*/), 
-			Device.fASPECT, VIEWPORT_NEAR, 
-			z_distance * g_pGamePersistent->Environment().CurrentEnv->far_plane);
+		Statistic.RenderCALC.Begin();
+		float z_distance = ps_r2_zfill;
+		Fmatrix m_zfill, m_project;
+		m_project.build_projection(deg2rad(Device.fFOV), Device.fASPECT, VIEWPORT_NEAR, z_distance * g_pGamePersistent->Environment().CurrentEnv->far_plane);
 		m_zfill.mul	(m_project,Device.mView);
-		r_pmask										(true,false);	// enable priority "0"
-		set_Recorder								(NULL)		;
-		phase										= PHASE_SMAP;
-		render_main									(m_zfill,false)	;
-		r_pmask										(true,false);	// disable priority "1"
-		Statistic.RenderCALC.End				( )			;
+		r_pmask(true, false);	// enable priority "0"
+		set_Recorder(NULL);
+		phase = PHASE_SMAP;
+		render_main(m_zfill, false);
+		r_pmask(true, false);	// disable priority "1"
+		Statistic.RenderCALC.End();
 
 		// flush
-		Target->phase_scene_prepare					();
-		RCache.set_ColorWriteEnable					(FALSE);
-		r_dsgraph_render_graph						(0);
-		RCache.set_ColorWriteEnable					( );
+		Target->phase_scene_prepare();
+		RCache.set_ColorWriteEnable(FALSE);
+		r_dsgraph_render_graph(0);
+		RCache.set_ColorWriteEnable();
 	} 
 	else 
 	{
-		Target->phase_scene_prepare					();
+		Target->phase_scene_prepare();
 	}
 
 	//*******
 	// Sync point
-	Statistic.RenderDUMP_Wait_S.Begin	();
+	Statistic.RenderDUMP_Wait_S.Begin();
 	if (1)
 	{
-		CTimer	T;							T.Start	();
-		BOOL	result						= FALSE;
-		HRESULT	hr							= S_FALSE;
-		//while	((hr=q_sync_point[q_sync_count]->GetData	(&result,sizeof(result),D3DGETDATA_FLUSH))==S_FALSE) {
-		while	((hr=GetData (q_sync_point[q_sync_count], &result,sizeof(result)))==S_FALSE) 
+		CTimer T;
+		T.Start();
+		BOOL result = FALSE;
+		HRESULT hr = S_FALSE;
+		while ((hr = GetData(q_sync_point[q_sync_count], &result,sizeof(result))) == S_FALSE) 
 		{
-			if (!SwitchToThread())			Sleep(ps_r2_wait_sleep);
-			if (T.GetElapsed_ms() > 500)	{
-				result	= FALSE;
+			if (!SwitchToThread())
+				Sleep(ps_r2_wait_sleep);
+			if (T.GetElapsed_ms() > 500)	
+			{
+				result = FALSE;
 				break;
 			}
 		}
 	}
-	Statistic.RenderDUMP_Wait_S.End		();
-	q_sync_count								= (q_sync_count+1)%HW.Caps.iGPUNum;
-	//CHK_DX										(q_sync_point[q_sync_count]->Issue(D3DISSUE_END));
-	CHK_DX										(EndQuery(q_sync_point[q_sync_count]));
+
+	Statistic.RenderDUMP_Wait_S.End();
+	q_sync_count = (q_sync_count + 1) % HW.Caps.iGPUNum;
+
+	CHK_DX(EndQuery(q_sync_point[q_sync_count]));
 
 	//******* Main calc - DEFERRER RENDERER
 	// Main calc
-	Statistic.RenderCALC.Begin			();
-	r_pmask										(true,false,true);	// enable priority "0",+ capture wmarks
-	if (bSUN)									set_Recorder	(&main_coarse_structure);
-	else										set_Recorder	(NULL);
-	phase										= PHASE_NORMAL;
-	render_main									(Device.mFullTransform,true);
-	set_Recorder								(NULL);
-	r_pmask										(true,false);	// disable priority "1"
-	Statistic.RenderCALC.End			();
+	Statistic.RenderCALC.Begin();
+	r_pmask(true, false, true);	// enable priority "0",+ capture wmarks
+	if (bSUN)
+		set_Recorder(&main_coarse_structure);
+	else
+		set_Recorder(NULL);
+	phase = PHASE_NORMAL;
+	render_main(Device.mFullTransform, true);
+	set_Recorder(NULL);
+	r_pmask(true, false);	// disable priority "1"
+	Statistic.RenderCALC.End();
 
-	BOOL	split_the_scene_to_minimize_wait		= FALSE;
-	if (ps_r2_ls_flags.test(R2FLAG_EXP_SPLIT_SCENE))	split_the_scene_to_minimize_wait=TRUE;
+	BOOL split_the_scene_to_minimize_wait = FALSE;
+	if (ps_r2_ls_flags.test(R2FLAG_EXP_SPLIT_SCENE))
+		split_the_scene_to_minimize_wait = TRUE;
 
 	//******* Main render :: PART-0	-- first
 	if (!split_the_scene_to_minimize_wait)
 	{
 		PIX_EVENT(DEFER_PART0_NO_SPLIT);
 		// level, DO NOT SPLIT
-		Target->phase_scene_begin				();
-		r_dsgraph_render_hud					();
-		r_dsgraph_render_graph					(0);
-		r_dsgraph_render_lods					(true,true);
-		if(Details)	Details->Render				();
-		Target->phase_scene_end					();
+		Target->phase_scene_begin();
+		r_dsgraph_render_hud();
+		r_dsgraph_render_graph(0);
+		r_dsgraph_render_lods(true, true);
+		if (Details)
+			Details->Render();
+		Target->phase_scene_end();
 	} 
 	else 
 	{
 		PIX_EVENT(DEFER_PART0_SPLIT);
 		// level, SPLIT
-		Target->phase_scene_begin				();
-		r_dsgraph_render_graph					(0);
-		Target->disable_aniso					();
+		Target->phase_scene_begin();
+		r_dsgraph_render_graph(0);
+		Target->disable_aniso();
 	}
 
 	//******* Occlusion testing of volume-limited light-sources
-	Target->phase_occq							();
-	LP_normal.clear								();
-	LP_pending.clear							();
-   if( RImplementation.o.dx10_msaa )
-      RCache.set_ZB( RImplementation.Target->rt_MSAADepth->pZRT );
+	Target->phase_occq();
+	LP_normal.clear();
+	LP_pending.clear();
+	if (RImplementation.o.dx10_msaa)
+      RCache.set_ZB(RImplementation.Target->rt_MSAADepth->pZRT);
+
 	{
 		PIX_EVENT(DEFER_TEST_LIGHT_VIS);
 		// perform tests
-		u32	count			= 0;
-		light_Package&	LP	= Lights.package;
+		u32	count = 0;
+		light_Package& LP = Lights.package;
 
 		// stats
-		stats.l_shadowed	= LP.v_shadowed.size();
-		stats.l_unshadowed	= LP.v_point.size() + LP.v_spot.size();
-		stats.l_total		= stats.l_shadowed + stats.l_unshadowed;
+		stats.l_shadowed = LP.v_shadowed.size();
+		stats.l_unshadowed = LP.v_point.size() + LP.v_spot.size();
+		stats.l_total = stats.l_shadowed + stats.l_unshadowed;
 
 		// perform tests
-		count				= _max	(count,LP.v_point.size());
-		count				= _max	(count,LP.v_spot.size());
-		count				= _max	(count,LP.v_shadowed.size());
-		for (u32 it=0; it<count; it++)	{
-			if (it<LP.v_point.size())		{
-				light*	L			= LP.v_point	[it];
-				L->vis_prepare		();
-				if (L->vis.pending)	LP_pending.v_point.push_back	(L);
-				else				LP_normal.v_point.push_back		(L);
+		count = _max(count, LP.v_point.size());
+		count = _max(count, LP.v_spot.size());
+		count = _max(count, LP.v_shadowed.size());
+		for (u32 it = 0; it < count; it++)	
+		{
+			if (it < LP.v_point.size())		
+			{
+				light* L = LP.v_point[it];
+				L->vis_prepare();
+				if (L->vis.pending)
+					LP_pending.v_point.push_back(L);
+				else
+					LP_normal.v_point.push_back(L);
 			}
-			if (it<LP.v_spot.size())		{
-				light*	L			= LP.v_spot		[it];
-				L->vis_prepare		();
-				if (L->vis.pending)	LP_pending.v_spot.push_back		(L);
-				else				LP_normal.v_spot.push_back		(L);
+
+			if (it < LP.v_spot.size())		
+			{
+				light* L = LP.v_spot[it];
+				L->vis_prepare();
+				if (L->vis.pending)
+					LP_pending.v_spot.push_back(L);
+				else
+					LP_normal.v_spot.push_back(L);
 			}
-			if (it<LP.v_shadowed.size())	{
-				light*	L			= LP.v_shadowed	[it];
-				L->vis_prepare		();
-				if (L->vis.pending)	LP_pending.v_shadowed.push_back	(L);
-				else				LP_normal.v_shadowed.push_back	(L);
+
+			if (it < LP.v_shadowed.size())	
+			{
+				light* L = LP.v_shadowed[it];
+				L->vis_prepare();
+				if (L->vis.pending)
+					LP_pending.v_shadowed.push_back(L);
+				else
+					LP_normal.v_shadowed.push_back(L);
 			}
 		}
 	}
@@ -453,8 +471,8 @@ void CRender::Render()
    // full screen pass to mark msaa-edge pixels in highest stencil bit
    if (RImplementation.o.dx10_msaa)
    {
-	   PIX_EVENT(MARK_MSAA_EDGES);
-      Target->mark_msaa_edges();
+		PIX_EVENT(MARK_MSAA_EDGES);
+		Target->mark_msaa_edges();
    }
 
 	//	TODO: DX10: Implement DX10 rain.
@@ -481,9 +499,9 @@ void CRender::Render()
 		RCache.set_xform_view(Device.mView);
 		// Stencil - write 0x1 at pixel pos - 
 		if (!RImplementation.o.dx10_msaa)
-		   RCache.set_Stencil(TRUE, D3DCMP_ALWAYS ,0x01, 0xff, 0xff, D3DSTENCILOP_KEEP, D3DSTENCILOP_REPLACE, D3DSTENCILOP_KEEP);
+			RCache.set_Stencil(TRUE, D3DCMP_ALWAYS ,0x01, 0xff, 0xff, D3DSTENCILOP_KEEP, D3DSTENCILOP_REPLACE, D3DSTENCILOP_KEEP);
 		else
-		   RCache.set_Stencil(TRUE, D3DCMP_ALWAYS, 0x01, 0xff, 0x7f, D3DSTENCILOP_KEEP, D3DSTENCILOP_REPLACE, D3DSTENCILOP_KEEP);
+			RCache.set_Stencil(TRUE, D3DCMP_ALWAYS, 0x01, 0xff, 0x7f, D3DSTENCILOP_KEEP, D3DSTENCILOP_REPLACE, D3DSTENCILOP_KEEP);
 		RCache.set_CullMode(CULL_CCW);
 		RCache.set_ColorWriteEnable();
 		RImplementation.r_dsgraph_render_emissive();
