@@ -194,7 +194,7 @@ void CLevel::IR_OnKeyboardPress	(int key)
 #ifdef DEBUG
 		FS.get_path					("$game_config$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
 		FS.get_path					("$game_scripts$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
-		FS.rescan_pathes			();
+		FS.rescan_physical_pathes();
 #endif // DEBUG
 		string_path					saved_game,command;
 		strconcat					(sizeof(saved_game),saved_game,Core.UserName,"_","quicksave");
@@ -212,7 +212,7 @@ void CLevel::IR_OnKeyboardPress	(int key)
 		if (GameID() != eGameIDSingle) return;
 		FS.get_path					("$game_config$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
 		FS.get_path					("$game_scripts$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
-		FS.rescan_pathes			();
+		FS.rescan_physical_pathes			();
 		NET_Packet					net_packet;
 		net_packet.w_begin			(M_RELOAD_GAME);
 		Send						(net_packet,net_flags(TRUE));

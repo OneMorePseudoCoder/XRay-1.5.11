@@ -556,6 +556,8 @@ CVirtualFileRW::~CVirtualFileRW()
 
 CVirtualFileReader::CVirtualFileReader(const char *cFileName) 
 {
+    Pos = 0;
+
 	// Open the file
 	hSrcFile = CreateFile(cFileName, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
 	R_ASSERT3(hSrcFile != INVALID_HANDLE_VALUE, cFileName, Debug.error2string(GetLastError()));

@@ -106,7 +106,7 @@ ENGINE_API CApplication* pApp = NULL;
 static HWND logoWindow = NULL;
 
 int doLauncher();
-void doBenchmark (LPCSTR name);
+void doBenchmark(LPCSTR name);
 ENGINE_API bool g_bBenchmark = false;
 string512 g_sBenchmarkName;
 
@@ -669,7 +669,7 @@ int APIENTRY WinMain_impl(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lp
 	return 0;
 }
 
-int stack_overflow_exception_filter	(int exception_code)
+int stack_overflow_exception_filter(int exception_code)
 {
    if (exception_code == EXCEPTION_STACK_OVERFLOW)
    {
@@ -698,7 +698,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lpCmdLi
 	return (0);
 }
 
-LPCSTR _GetFontTexName (LPCSTR section)
+LPCSTR _GetFontTexName(LPCSTR section)
 {
 	static char* tex_names[] = { "texture800", "texture", "texture1600" };
 	int def_idx = 1;
@@ -853,7 +853,7 @@ void CApplication::OnEvent(EVENT E, u64 P1, u64 P2)
 			DEL_INSTANCE(g_pGameLevel);
 			Console->Show();
 			
-			if( (FALSE == Engine.Event.Peek("KERNEL:quit")) && (FALSE == Engine.Event.Peek("KERNEL:start")))
+			if ((FALSE == Engine.Event.Peek("KERNEL:quit")) && (FALSE == Engine.Event.Peek("KERNEL:start")))
 			{
 				Console->Execute("main_menu off");
 				Console->Execute("main_menu on");
@@ -1002,12 +1002,12 @@ void CApplication::Level_Set(u32 L)
 		return;
 
 	Level_Current = L;
-	FS.get_path	("$level$")->_set(Levels[L].folder);
+	FS.get_path("$level$")->_set(Levels[L].folder);
 
 	string_path temp;
 	string_path temp2;
 	strconcat(sizeof(temp), temp, "intro\\intro_", Levels[L].folder);
-	temp[xr_strlen(temp)-1] = 0;
+	temp[xr_strlen(temp) - 1] = 0;
 	if (FS.exist(temp2, "$game_textures$", temp, ".dds") || FS.exist(temp2, "$level$", temp, ".dds"))
 		m_pRender->setLevelLogo(temp);
 	else
@@ -1072,7 +1072,7 @@ CInifile* CApplication::GetArchiveHeader(LPCSTR name, LPCSTR ver)
 
 		LPCSTR ln = A.header->r_string("header", "level_name");
 		LPCSTR lv = A.header->r_string("header", "level_ver");
-		if (0 == stricmp(ln,name) && 0 == stricmp(lv, ver))
+		if (0 == stricmp(ln, name) && 0 == stricmp(lv, ver))
 		{
 			return A.header;
 		}
@@ -1131,7 +1131,7 @@ void doBenchmark(LPCSTR name)
 {
 	g_bBenchmark = true;
 	string_path in_file;
-	FS.update_path(in_file,"$app_data_root$", name);
+	FS.update_path(in_file, "$app_data_root$", name);
 	CInifile ini(in_file);
 	int test_count = ini.line_count("benchmark");
 	LPCSTR test_name,t;
@@ -1141,7 +1141,7 @@ void doBenchmark(LPCSTR name)
 		ini.r_line("benchmark", i, &test_name, &t);
 		strcpy_s(g_sBenchmarkName, test_name);
 		
-		test_command = ini.r_string_wb("benchmark",test_name);
+		test_command = ini.r_string_wb("benchmark", test_name);
 		strcpy_s(Core.Params, *test_command);
 		_strlwr_s(Core.Params);
 		

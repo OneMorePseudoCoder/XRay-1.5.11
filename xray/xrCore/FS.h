@@ -666,10 +666,10 @@ private:
 class XRCORE_API IReader : public IReaderBase<IReader> 
 {
 protected:
-	char* data;
-	int Pos;
-	int Size;
-	int iterpos;
+    char* data{};
+    int Pos{};
+    int Size{};
+    int iterpos{};
 
 public:
 	IC IReader()
