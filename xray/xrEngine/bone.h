@@ -10,73 +10,75 @@
 // refs
 class CBone;
 
-#define	BI_NONE				(u16(-1))
+#define	BI_NONE (u16(-1))
 
-#define OGF_IKDATA_VERSION	0x0001
+#define OGF_IKDATA_VERSION 0x0001
 
-#define	MAX_BONE_PARAMS		4
+#define	MAX_BONE_PARAMS 4
 
 class ENGINE_API CBoneInstance;
 // callback
-typedef void (* BoneCallback)		(CBoneInstance* P);
+typedef void (*BoneCallback)(CBoneInstance* P);
 
 //*** Bone Instance *******************************************************************************
-#pragma pack(push,8)
-class ENGINE_API		CBoneInstance
+#pragma pack(push, 8)
+class ENGINE_API CBoneInstance
 {
 public:
 	// data
-	Fmatrix				mTransform;							// final x-form matrix (local to model)
-	Fmatrix				mRenderTransform;					// final x-form matrix (model_base -> bone -> model)
+	Fmatrix mTransform;							// final x-form matrix (local to model)
+	Fmatrix mRenderTransform;					// final x-form matrix (model_base -> bone -> model)
 private:
-	BoneCallback		Callback;
-	void*				Callback_Param;
-	BOOL				Callback_overwrite;					// performance hint - don't calc anims
-	u32					Callback_type;	
+	BoneCallback Callback;
+	void* Callback_Param;
+	BOOL Callback_overwrite;					// performance hint - don't calc anims
+	u32 Callback_type;	
 public:
-	float				param			[MAX_BONE_PARAMS];	// 
+	float param[MAX_BONE_PARAMS];
 	//
 	// methods
 public:
-	IC	BoneCallback		callback()					{ return  Callback; }
-	IC	void*				callback_param()			{ return Callback_Param;	}
-	IC	BOOL				callback_overwrite()		{ return Callback_overwrite; }					// performance hint - don't calc anims
-	IC	u32					callback_type()				{ return Callback_type; }	
+	IC BoneCallback callback() { return Callback; }
+	IC void* callback_param() { return Callback_Param; }
+	IC BOOL callback_overwrite() { return Callback_overwrite; }					// performance hint - don't calc anims
+	IC u32 callback_type() { return Callback_type; }	
 public:
-	void				construct		();
-	void				set_callback	(u32 Type, BoneCallback C, void* Param, BOOL overwrite=FALSE);
-	void				set_callback_overwrite(BOOL v){ Callback_overwrite = v; }
-	void				reset_callback	();
-	void				set_param		(u32 idx, float data);
-	float				get_param		(u32 idx);
+	void construct();
+	void set_callback(u32 Type, BoneCallback C, void* Param, BOOL overwrite = FALSE);
+	void set_callback_overwrite(BOOL v) { Callback_overwrite = v; }
+	void reset_callback();
+	void set_param(u32 idx, float data);
+	float get_param(u32 idx);
 
-	u32					mem_usage		(){return sizeof(*this);}
+	u32 mem_usage() { return sizeof(*this); }
 };
 #pragma pack(pop)
 
-#pragma pack( push,2 )
+#pragma pack(push, 2)
 struct ENGINE_API vertBoned1W			// (3+3+3+3+2+1)*4 = 15*4 = 60 bytes
 {
 	Fvector	P;
 	Fvector	N;
 	Fvector	T;
 	Fvector	B;
-	float	u,v;
-	u32		matrix;
-	void	get_pos( Fvector& p ) const { p.set(P); }
+	float u, v;
+	u32 matrix;
+	void get_pos(Fvector& p) const { p.set(P); }
 };
+
 struct ENGINE_API vertBoned2W			// (1+3+3 + 1+3+3 + 2)*4 = 16*4 = 64 bytes
 {
-	u16		matrix0;
-	u16		matrix1;
+	u16 matrix0;
+	u16 matrix1;
 	Fvector	P;
 	Fvector	N;
 	Fvector	T;
 	Fvector	B;
-	float	w;
-	float	u,v;
-	void	get_pos( Fvector& p ) const { p.set(P); }
+	float w;
+	float u, v;
+	void get_pos(Fvector& p) const { p.set(P); }
 };
+
 struct ENGINE_API vertBoned3W          // 70 bytes
 {
 	u16		m		[3];

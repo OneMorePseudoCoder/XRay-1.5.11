@@ -6,11 +6,15 @@
 // BoneInstance methods
 void ENGINE_API	CBoneInstance::construct()
 {
-	ZeroMemory(this, sizeof(*this));
 	mTransform.identity();
 
 	mRenderTransform.identity();
-	Callback_overwrite = FALSE;
+    Callback = nullptr;
+    Callback_Param = nullptr;
+    Callback_overwrite = false;
+    Callback_type = 0;
+
+    ZeroMemory(&param, sizeof(param));
 }
 
 void ENGINE_API CBoneInstance::set_callback(u32 Type, BoneCallback C, void* Param, BOOL overwrite)

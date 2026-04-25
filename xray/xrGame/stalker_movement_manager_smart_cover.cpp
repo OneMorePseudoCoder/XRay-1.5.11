@@ -26,7 +26,8 @@
 #include "inventory.h"
 #include "weapon.h"
 
-namespace smart_cover {
+namespace smart_cover 
+{
 	shared_str	transform_vertex(shared_str const &vertex_id, bool const &in);
 } // namespace smart_cover
 
@@ -45,133 +46,142 @@ stalker_movement_manager_smart_cover::stalker_movement_manager_smart_cover	(CAI_
 	m_check_can_kill_enemy					(false),
 	m_combat_behaviour						(false)
 {
-	m_target.construct				(this);
-	m_target_selector				= xr_new<target_selector_type>();
+	m_target.construct(this);
+	m_target_selector = xr_new<target_selector_type>();
 }
 
-stalker_movement_manager_smart_cover::~stalker_movement_manager_smart_cover	()
+stalker_movement_manager_smart_cover::~stalker_movement_manager_smart_cover()
 {
-	xr_delete						(m_animation_selector);
-	xr_delete						(m_target_selector);
+	xr_delete(m_animation_selector);
+	xr_delete(m_target_selector);
 }
 
-void stalker_movement_manager_smart_cover::reinit	()
+void stalker_movement_manager_smart_cover::reinit()
 {
-	inherited::reinit				();
+	inherited::reinit();
 
-	m_animation_selector			= xr_new<animation_selector_type>(&object());
-	m_animation_selector->setup		(&object(), m_property_storage);
+	xr_delete(m_animation_selector);
+	m_animation_selector = xr_new<animation_selector_type>(&object());
+	m_animation_selector->setup(&object(), m_property_storage);
 
-	m_target.construct				(this);
+	m_target.construct(this);
 }
 
-void stalker_movement_manager_smart_cover::update	(u32 time_delta)
+void stalker_movement_manager_smart_cover::update(u32 time_delta)
 {
 	if (object().getDestroy())
 		return;
 
-	VERIFY							(object().g_Alive());
-	VERIFY							(!current_params().cover() || current_params().cover_loophole());
+	VERIFY(object().g_Alive());
+	VERIFY(!current_params().cover() || current_params().cover_loophole());
 
-	if (!m_current.cover()) {
-		if (!m_target.cover()) {
-			inherited::update		(time_delta);
+	if (!m_current.cover()) 
+	{
+		if (!m_target.cover()) 
+		{
+			inherited::update(time_delta);
 			return;
 		}
 
-		enter_smart_cover			(time_delta);
+		enter_smart_cover(time_delta);
 		return;
 	}
 
 	if (m_non_animated_loophole_change)
 		non_animated_change_loophole();
 
-	if (!m_current.cover()) {
-		inherited::update			(time_delta);
+	if (!m_current.cover()) 
+	{
+		inherited::update(time_delta);
 		return;
 	}
 
-	VERIFY							(m_current.cover_loophole());
-	if (m_target.cover() && (m_current.cover_loophole() == m_target.cover_loophole())) {
-		m_current.cover_fire_object		(m_target.cover_fire_object());
-		m_current.cover_fire_position	(m_target.cover_fire_position());
+	VERIFY(m_current.cover_loophole());
+	if (m_target.cover() && (m_current.cover_loophole() == m_target.cover_loophole())) 
+	{
+		m_current.cover_fire_object(m_target.cover_fire_object());
+		m_current.cover_fire_position(m_target.cover_fire_position());
 	}
 
-	m_target_selector->update			();
+	m_target_selector->update();
 }
 
-void stalker_movement_manager_smart_cover::enter_smart_cover			()
+void stalker_movement_manager_smart_cover::enter_smart_cover()
 {
-	smart_cover::loophole const&		target_loophole = *m_target.cover_loophole();
-	smart_cover::loophole const&		loophole = target_loophole.enterable() ? target_loophole : nearest_enterable_loophole();
+	smart_cover::loophole const& target_loophole = *m_target.cover_loophole();
+	smart_cover::loophole const& loophole = target_loophole.enterable() ? target_loophole : nearest_enterable_loophole();
 
-	bind_global_selector				();
+	bind_global_selector();
 
-	if ( !m_current.cover() && (m_enter_cover_id != "") && ((m_target.cover_id() != m_enter_cover_id) || (m_target.cover_loophole_id() != m_enter_loophole_id)) ) {
+	if (!m_current.cover() && (m_enter_cover_id != "") && ((m_target.cover_id() != m_enter_cover_id) || (m_target.cover_loophole_id() != m_enter_loophole_id))) 
+	{
 #ifdef DEBUG
-		Msg								("setting up cover: %s (%s)", m_enter_cover_id.c_str(), m_enter_cover_id.c_str());
+		Msg("setting up cover: %s (%s)", m_enter_cover_id.c_str(), m_enter_cover_id.c_str());
 #endif // #ifdef DEBUG
-		m_current.cover_id				(m_enter_cover_id);
-		m_current.cover_loophole_id		(m_enter_loophole_id);
+		m_current.cover_id(m_enter_cover_id);
+		m_current.cover_loophole_id(m_enter_loophole_id);
 	}
-	else {
-		go_next_loophole				();
-		VERIFY							(m_current.cover_id()._get() == m_target.cover_id()._get());
-		if (&loophole == m_target.cover_loophole()) {
-			m_current.cover_fire_object		(m_target.cover_fire_object());
-			m_current.cover_fire_position	(m_target.cover_fire_position());
+	else 
+	{
+		go_next_loophole();
+		VERIFY(m_current.cover_id()._get() == m_target.cover_id()._get());
+		if (&loophole == m_target.cover_loophole()) 
+		{
+			m_current.cover_fire_object(m_target.cover_fire_object());
+			m_current.cover_fire_position(m_target.cover_fire_position());
 		}
 	}
 
-	m_animation_selector->initialize	();
+	m_animation_selector->initialize();
 }
 
-MotionID stalker_movement_manager_smart_cover::select_animation			(bool& animation_movement_controller)
+MotionID stalker_movement_manager_smart_cover::select_animation(bool& animation_movement_controller)
 {
 	if (!object().g_Alive())
-		return							(MotionID());
+		return (MotionID());
 
-	animation_movement_controller		= true;
-	VERIFY								(m_entering_smart_cover_with_animation || current_transition().animation().has_animation());
-	return								(m_enter_animation);
+	animation_movement_controller = true;
+	VERIFY(m_entering_smart_cover_with_animation || current_transition().animation().has_animation());
+	return (m_enter_animation);
 }
 
-void stalker_movement_manager_smart_cover::on_animation_end				()
+void stalker_movement_manager_smart_cover::on_animation_end()
 {
-	VERIFY								(m_entering_smart_cover_with_animation);
-	VERIFY								(!m_current.cover());
-	m_entering_smart_cover_with_animation	= false;
+	VERIFY(m_entering_smart_cover_with_animation);
+	VERIFY(!m_current.cover());
+	m_entering_smart_cover_with_animation = false;
 
-	if (!m_target.cover()) {
+	if (!m_target.cover()) 
+	{
 		if (!m_current.cover())
-			unbind_global_selector		();
+			unbind_global_selector();
 
 		return;
 	}
 
-	enter_smart_cover					();
+	enter_smart_cover();
 }
 
-void stalker_movement_manager_smart_cover::on_frame						(CPHMovementControl *movement_control, Fvector &dest_position)
+void stalker_movement_manager_smart_cover::on_frame(CPHMovementControl *movement_control, Fvector &dest_position)
 {
-	inherited::on_frame					(movement_control, dest_position);
+	inherited::on_frame(movement_control, dest_position);
 }
 
 extern float g_smart_cover_animation_speed_factor;
 
-void stalker_movement_manager_smart_cover::modify_animation				(CBlend* blend)
+void stalker_movement_manager_smart_cover::modify_animation(CBlend* blend)
 {
 	if (!blend)
 		return;
 
-	CMotionDef							*motion_def = smart_cast<IKinematicsAnimated*>(object().Visual())->LL_GetMotionDef(blend->motionID);
-	VERIFY								(motion_def);
-	blend->speed						= motion_def->Speed()*g_smart_cover_animation_speed_factor;
+	CMotionDef *motion_def = smart_cast<IKinematicsAnimated*>(object().Visual())->LL_GetMotionDef(blend->motionID);
+	VERIFY(motion_def);
+	blend->speed = motion_def->Speed() * g_smart_cover_animation_speed_factor;
 }
 
 bool show_restrictions	(CRestrictedObject *object);
 
-void stalker_movement_manager_smart_cover::reach_enter_location			(u32 const& time_delta)
+void stalker_movement_manager_smart_cover::reach_enter_location(u32 const& time_delta)
 {
 	m_current.m_path_type				= MovementManager::ePathTypeLevelPath;
 	m_current.m_detail_path_type		= DetailPathManager::eDetailPathTypeSmooth;
@@ -216,7 +226,8 @@ void stalker_movement_manager_smart_cover::reach_enter_location			(u32 const& ti
 		VERIFY2						(restrictions().accessible(position) || show_restrictions(&restrictions()),*object().cName());
 		m_current.desired_position	(&position);
 	}
-	else {
+	else 
+	{
 		CMovementManager::set_level_dest_vertex	(level_vertex_id);
 		m_current.desired_position				(&position);
 	}
@@ -329,14 +340,13 @@ bool stalker_movement_manager_smart_cover::target_approached			(float const &dis
 	return								(detail().distance_to_target() < distance);
 }
 
-namespace hash_fixed_vertex_manager {
-	
-IC	u32 to_u32	(shared_str const &string)
+namespace hash_fixed_vertex_manager 
+{
+IC u32 to_u32(shared_str const &string)
 {
 	const str_value	*get = string._get();
-	return			(*(u32 const*)&get);
+	return (*(u32 const*)&get);
 }
-
 } // namespace hash_fixed_vertex_manager
 
 void stalker_movement_manager_smart_cover::loophole_path					(smart_cover::cover const &cover, shared_str const &source_raw, shared_str const &target_raw, LoopholePath &path) const
@@ -444,123 +454,68 @@ stalker_movement_manager_smart_cover::transition_action const &stalker_movement_
 }
 
 
-void stalker_movement_manager_smart_cover::cleanup_after_animation_selector	()
+void stalker_movement_manager_smart_cover::cleanup_after_animation_selector()
 {
-	level_path().make_inactual	();
-	detail().make_inactual		();
+	level_path().make_inactual();
+	detail().make_inactual();
 }
 
-void stalker_movement_manager_smart_cover::target_selector					(CScriptCallbackEx<void> const &callback)
+void stalker_movement_manager_smart_cover::target_selector(CScriptCallbackEx<void> const &callback)
 {
-	VERIFY						(m_target_selector);
-	m_target_selector->callback	(callback);
+	VERIFY(m_target_selector);
+	m_target_selector->callback(callback);
 }
 
-void stalker_movement_manager_smart_cover::target_idle						()
+void stalker_movement_manager_smart_cover::target_idle()
 {
-//	if (!m_current.cover()) {
-//		Msg								("! Cannot set target idle. Bad or absent smart_cover.");
-//		return;
-//	}
-
-//	if (!m_current.cover_loophole()->is_action_available("idle")) {
-//		Msg								("! Cannot set target idle. Loophole has no such action.");
-//		return;
-//	}
-
-	m_target_selector->object().target	(StalkerDecisionSpace::eWorldPropertyLoopholeIdle);
+	m_target_selector->object().target(StalkerDecisionSpace::eWorldPropertyLoopholeIdle);
 }
 
-void stalker_movement_manager_smart_cover::target_lookout					()
+void stalker_movement_manager_smart_cover::target_lookout()
 {
-//	if (!m_current.cover()) {
-//		Msg								("! Cannot set target lookout. Bad or absent smart_cover.");
-//		return;
-//	}
-
-//	if (!m_current.cover_loophole()->is_action_available("lookout")) {
-//		Msg								("! Cannot set target lookout. Loophole has no such action.");
-//		return;
-//	}
-
-	m_target_selector->object().target	(StalkerDecisionSpace::eWorldPropertyLookedOut);
+	m_target_selector->object().target(StalkerDecisionSpace::eWorldPropertyLookedOut);
 }
 
-void stalker_movement_manager_smart_cover::target_fire						()
+void stalker_movement_manager_smart_cover::target_fire()
 {
-//	if (!m_current.cover()) {
-//		Msg								("! Cannot set target fire. Bad or absent smart_cover.");
-//		return;
-//	}
-
-//	if (!m_current.cover_loophole()->is_action_available("fire")) {
-//		Msg								("! Cannot set target fire. Loophole has no such action.");
-//		return;
-//	}
-
-//	if (!enemy_in_fov()) {
-//		Msg								("! Cannot set target fire. Enemy is not in current loophole's fov.");
-//		return;
-//	}
-
-	m_target_selector->object().target	(StalkerDecisionSpace::eWorldPropertyLoopholeFire);
+	m_target_selector->object().target(StalkerDecisionSpace::eWorldPropertyLoopholeFire);
 }
 
-void stalker_movement_manager_smart_cover::target_fire_no_lookout			()
+void stalker_movement_manager_smart_cover::target_fire_no_lookout()
 {
-//	if (!current_params().cover()) {
-//		Msg								("! Cannot set target fire_no_lookout. Bad or absent smart_cover.");
-//		return;
-//	}
-
-//	if (!current_params().cover_loophole()->is_action_available("fire_no_lookout")) {
-//		Msg								("! Cannot set target fire_no_lookout. Loophole has no such action.");
-//		return;
-//	}
-
-	m_target_selector->object().target	(StalkerDecisionSpace::eWorldPropertyLoopholeFireNoLookout);
+	m_target_selector->object().target(StalkerDecisionSpace::eWorldPropertyLoopholeFireNoLookout);
 }
 
-void stalker_movement_manager_smart_cover::target_default					(bool const& value)
+void stalker_movement_manager_smart_cover::target_default(bool const& value)
 {
-//	if (!current_params().cover()) {
-//		Msg								("! Cannot set target fire_no_lookout. Bad or absent smart_cover.");
-//		return;
-//	}
-
-//	if (!current_params().cover_loophole()->is_action_available("fire_no_lookout")) {
-//		Msg								("! Cannot set target fire_no_lookout. Loophole has no such action.");
-//		return;
-//	}
-
-	m_default_behaviour					= value;
+	m_default_behaviour = value;
 }
 
-bool stalker_movement_manager_smart_cover::default_behaviour	() const
+bool stalker_movement_manager_smart_cover::default_behaviour() const
 {
-	VERIFY							(m_current.cover());
-	VERIFY							(m_current.cover_loophole());
+	VERIFY(m_current.cover());
+	VERIFY(m_current.cover_loophole());
 
-	VERIFY							(m_target_selector);
+	VERIFY(m_target_selector);
 	if (m_target_selector->callback())
-		return						(m_default_behaviour);
+		return (m_default_behaviour);
 
 	if (m_current.cover_fire_object())
-		return						(true);
+		return (true);
 
 	if (m_current.cover_fire_position())
-		return						(true);
+		return (true);
 
-	return							(false);
+	return (false);
 }
 
-bool stalker_movement_manager_smart_cover::in_smart_cover		() const
+bool stalker_movement_manager_smart_cover::in_smart_cover() const
 {
 	if (current_params().cover())
-		return						(true);
+		return (true);
 
 	if (entering_smart_cover_with_animation())
-		return						(true);
+		return (true);
 
-	return							(false);
+	return (false);
 }
