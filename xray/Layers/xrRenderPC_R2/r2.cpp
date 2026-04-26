@@ -267,9 +267,8 @@ void CRender::create()
 
 	Target = xr_new<CRenderTarget>();	// Main target
 
-	Models = xr_new<CModelPool>	();
+	Models = xr_new<CModelPool>();
 	PSLibrary.OnCreate();
-	HWOCC.occq_create(occq_size);
 
 	marker = 0;
 
@@ -333,8 +332,6 @@ void CRender::reset_end()
 {
 	for (u32 i = 0; i < HW.Caps.iGPUNum; ++i)
 		R_CHK(HW.pDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[i]));
-
-	HWOCC.occq_create(occq_size);
 
 	Target = xr_new<CRenderTarget>();
 

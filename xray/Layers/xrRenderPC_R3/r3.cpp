@@ -127,7 +127,7 @@ void CRender::create()
 		{
 			u32 device_id = HW.Caps.id_device;
 			bool disable_nullrt = false;
-			switch (device_id)	
+			switch (device_id)
 			{
 			case 0x190:
 			case 0x191:
@@ -357,7 +357,6 @@ void CRender::create()
 
 	Models = xr_new<CModelPool>();
 	PSLibrary.OnCreate();
-	HWOCC.occq_create(occq_size);
 
 	rmNormal();
 	marker = 0;
@@ -438,7 +437,6 @@ void CRender::reset_end()
 
 	//	Prevent error on first get data
 	q_sync_point[0]->End();
-	HWOCC.occq_create(occq_size);
 
 	Target = xr_new<CRenderTarget>();
 

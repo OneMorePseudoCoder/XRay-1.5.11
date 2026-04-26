@@ -692,7 +692,7 @@
     <ClCompile Include="..\xrRender\r__loader.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="r2_R_lights.cpp">
+    <ClCompile Include="..\xrRender\r__lights.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="r2_R_render.cpp">

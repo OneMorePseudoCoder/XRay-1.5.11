@@ -132,7 +132,6 @@ public:
 	xr_vector<light*> Lights_LastFrame;
 	SMAP_Allocator LP_smap_pool;
 	light_Package LP_normal;
-	light_Package LP_pending;
 
 	xr_vector<Fbox3, render_alloc<Fbox3>> main_coarse_structure;
 
@@ -203,6 +202,11 @@ public:
 	IC u32 occq_get(u32& ID)
 	{ 
 		return HWOCC.occq_get(ID);
+	}
+
+	IC void occq_free(u32 ID)
+	{ 
+		HWOCC.occq_free(ID);
 	}
 
 	ICF void apply_object(IRenderable* O)

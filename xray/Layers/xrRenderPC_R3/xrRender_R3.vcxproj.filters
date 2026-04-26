@@ -1334,7 +1334,7 @@
     <ClCompile Include="..\xrRender\Debug\dxPixEventWrapper.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
-    <ClCompile Include="r3_R_lights.cpp">
+    <ClCompile Include="..\xrRender\r__lights.cpp">
       <Filter>Core</Filter>
     </ClCompile>
     <ClCompile Include="r3_R_sun.cpp">

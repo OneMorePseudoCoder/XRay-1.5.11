@@ -180,7 +180,7 @@ void CRender::render_menu()
 			Target->u_setrt(Target->rt_Generic_1, 0, 0, HW.pBaseZB);		// Now RT is a distortion mask
 		else
 			Target->u_setrt(Target->rt_Generic_1, 0, 0, RImplementation.Target->rt_MSAADepth->pZRT);		// Now RT is a distortion mask
-		FLOAT ColorRGBA[4] = { 127.0f / 255.0f, 127.0f / 255.0f, 0.0f, 127.0f / 255.0f};
+		FLOAT ColorRGBA[4] = { 127.0f / 255.0f, 127.0f / 255.0f, 0.0f, 127.0f / 255.0f };
 		HW.pDevice->ClearRenderTargetView(Target->rt_Generic_1->pRT, ColorRGBA);	
 		g_pGamePersistent->OnRenderPPUI_PP();	// PP-UI
 	}
@@ -349,14 +349,13 @@ void CRender::Render()
 	//******* Occlusion testing of volume-limited light-sources
 	Target->phase_occq();
 	LP_normal.clear();
-	LP_pending.clear();
+
 	if (RImplementation.o.dx10_msaa)
-      RCache.set_ZB(RImplementation.Target->rt_MSAADepth->pZRT);
+		RCache.set_ZB(RImplementation.Target->rt_MSAADepth->pZRT);
 
 	{
 		PIX_EVENT(DEFER_TEST_LIGHT_VIS);
 		// perform tests
-		u32	count = 0;
 		light_Package& LP = Lights.package;
 
 		// stats
@@ -365,45 +364,11 @@ void CRender::Render()
 		stats.l_total = stats.l_shadowed + stats.l_unshadowed;
 
 		// perform tests
-		count = _max(count, LP.v_point.size());
-		count = _max(count, LP.v_spot.size());
-		count = _max(count, LP.v_shadowed.size());
-		for (u32 it = 0; it < count; it++)	
-		{
-			if (it < LP.v_point.size())		
-			{
-				light* L = LP.v_point[it];
-				L->vis_prepare();
-				if (L->vis.pending)
-					LP_pending.v_point.push_back(L);
-				else
-					LP_normal.v_point.push_back(L);
-			}
-
-			if (it < LP.v_spot.size())		
-			{
-				light* L = LP.v_spot[it];
-				L->vis_prepare();
-				if (L->vis.pending)
-					LP_pending.v_spot.push_back(L);
-				else
-					LP_normal.v_spot.push_back(L);
-			}
-
-			if (it < LP.v_shadowed.size())	
-			{
-				light* L = LP.v_shadowed[it];
-				L->vis_prepare();
-				if (L->vis.pending)
-					LP_pending.v_shadowed.push_back(L);
-				else
-					LP_normal.v_shadowed.push_back(L);
-			}
-		}
+		LP_normal.v_point = LP.v_point;
+		LP_normal.v_shadowed = LP.v_shadowed;
+		LP_normal.v_spot = LP.v_spot;
+		LP_normal.vis_prepare();
 	}
-
-	LP_normal.sort();
-	LP_pending.sort();
 
     //******* Main render :: PART-1 (second)
 	if (split_the_scene_to_minimize_wait)	
@@ -430,7 +395,8 @@ void CRender::Render()
 		Target->phase_scene_begin();
 		r_dsgraph_render_hud();
 		r_dsgraph_render_lods(true, true);
-		if(Details)	Details->Render();
+		if (Details)
+			Details->Render();
 		Target->phase_scene_end();
 	}
 
@@ -468,12 +434,12 @@ void CRender::Render()
 		Lights_LastFrame.clear();
 	}
 
-   // full screen pass to mark msaa-edge pixels in highest stencil bit
-   if (RImplementation.o.dx10_msaa)
-   {
+	// full screen pass to mark msaa-edge pixels in highest stencil bit
+	if (RImplementation.o.dx10_msaa)
+	{
 		PIX_EVENT(MARK_MSAA_EDGES);
 		Target->mark_msaa_edges();
-   }
+	}
 
 	//	TODO: DX10: Implement DX10 rain.
 	if (ps_r2_ls_flags.test(R3FLAG_DYN_WET_SURF))
@@ -499,7 +465,7 @@ void CRender::Render()
 		RCache.set_xform_view(Device.mView);
 		// Stencil - write 0x1 at pixel pos - 
 		if (!RImplementation.o.dx10_msaa)
-			RCache.set_Stencil(TRUE, D3DCMP_ALWAYS ,0x01, 0xff, 0xff, D3DSTENCILOP_KEEP, D3DSTENCILOP_REPLACE, D3DSTENCILOP_KEEP);
+			RCache.set_Stencil(TRUE, D3DCMP_ALWAYS, 0x01, 0xff, 0xff, D3DSTENCILOP_KEEP, D3DSTENCILOP_REPLACE, D3DSTENCILOP_KEEP);
 		else
 			RCache.set_Stencil(TRUE, D3DCMP_ALWAYS, 0x01, 0xff, 0x7f, D3DSTENCILOP_KEEP, D3DSTENCILOP_REPLACE, D3DSTENCILOP_KEEP);
 		RCache.set_CullMode(CULL_CCW);
@@ -512,13 +478,9 @@ void CRender::Render()
 		PIX_EVENT(DEFER_LIGHT_NO_OCCQ);
 		Target->phase_accumulator();
 		HOM.Disable();
+		LP_normal.vis_update();
+		LP_normal.sort();
 		render_lights(LP_normal);
-	}
-
-	// Lighting, dependant on OCCQ
-	{
-		PIX_EVENT(DEFER_LIGHT_OCCQ);
-		render_lights(LP_pending);
 	}
 
 	// Postprocess
