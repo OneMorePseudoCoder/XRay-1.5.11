@@ -875,7 +875,7 @@
     <ClCompile Include="..\xrRender\light_smapvis.cpp">
       <Filter>Lights</Filter>
     </ClCompile>
-    <ClCompile Include="light_vis.cpp">
+    <ClCompile Include="..\xrRender\light_vis.cpp">
       <Filter>Lights</Filter>
     </ClCompile>
     <ClCompile Include="..\xrRender\LightTrack.cpp">

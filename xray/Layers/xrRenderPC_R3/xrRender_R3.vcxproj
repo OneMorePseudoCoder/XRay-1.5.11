@@ -814,6 +814,7 @@
     <ClCompile Include="..\xrRender\r__blenders.cpp" />
     <ClCompile Include="..\xrRender\r__loader.cpp" />
     <ClCompile Include="..\xrRender\r__lights.cpp" />
+    <ClCompile Include="..\xrRender\light_vis.cpp" />
     <ClCompile Include="..\xrRender\GlowManager.cpp" />
     <ClCompile Include="..\xrRender\Shader.cpp" />
     <ClCompile Include="..\xrRender\SH_Atomic.cpp" />
@@ -848,7 +849,6 @@
     <ClCompile Include="blender_ssao.cpp" />
     <ClCompile Include="dx10MinMaxSMBlender.cpp" />
     <ClCompile Include="light_GI.cpp" />
-    <ClCompile Include="light_vis.cpp" />
     <ClCompile Include="pch\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-LLVM|Win32'">Create</PrecompiledHeader>

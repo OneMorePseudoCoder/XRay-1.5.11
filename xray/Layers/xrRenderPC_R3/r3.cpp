@@ -24,7 +24,7 @@ ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual *pVisual, float c
 	int id = SE_R2_SHADOW;
 	if	(CRender::PHASE_NORMAL == RImplementation.phase)
 	{
-		id = ((_sqrt(cdist_sq)-pVisual->vis.sphere.R)<r_dtex_range) ? SE_R2_NORMAL_HQ : SE_R2_NORMAL_LQ;
+		id = ((_sqrt(cdist_sq) - pVisual->vis.sphere.R) < r_dtex_range) ? SE_R2_NORMAL_HQ : SE_R2_NORMAL_LQ;
 	}
 	return pVisual->shader->E[id]._get();
 }
