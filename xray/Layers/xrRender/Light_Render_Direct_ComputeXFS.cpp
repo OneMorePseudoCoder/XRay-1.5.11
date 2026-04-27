@@ -23,7 +23,7 @@ void CLight_Compute_XFORM_and_VIS::compute_xf_spot(light* L)
 		// auto find 'up' and 'right' vectors
 		L_up.set(0, 1, 0);
 		if (_abs(L_up.dotproduct(L_dir)) > .99f)
-			L_up.set(0,0,1);
+			L_up.set(0, 0, 1);
 		L_right.crossproduct(L_up, L_dir);
 		L_right.normalize();
 		L_up.crossproduct(L_dir, L_right);
@@ -81,6 +81,12 @@ void CLight_Compute_XFORM_and_VIS::compute_xf_spot(light* L)
 	// make N pixel border
 	L->X.S.view.build_camera_dir(L_pos, L_dir, L_up);
 
-	L->X.S.project.build_projection(L->cone + deg2rad(3.5f), 1.f, SMAP_near_plane, L->range + EPS_S);
+    float tan_shift;
+    if (L->flags.type == IRender_Light::POINT)
+        tan_shift = deg2rad(11.5f);
+    else
+        tan_shift = deg2rad(3.5f);
+
+    L->X.S.project.build_projection(L->cone + tan_shift, 1.f, L->virtual_size, L->range + EPS_S);
 	L->X.S.combine.mul(L->X.S.project, L->X.S.view);
 }

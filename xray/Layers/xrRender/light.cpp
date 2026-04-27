@@ -17,6 +17,7 @@ light::light(void) : ISpatial(g_SpatialSpace)
 	direction.set(0, -1, 0);
 	right.set(0, 0, 0);
 	range = 8.f;
+    virtual_size = 0.1f;
 	cone = deg2rad(60.f);
 	color.set(1, 1, 1, 1);
 
@@ -115,7 +116,7 @@ void light::set_active(bool a)
 		spatial_move();
 
 #ifdef DEBUG
-		Fvector	zero = {0,-1000,0};
+		Fvector	zero = { 0, -1000, 0 };
 		if (position.similar(zero))			
 		{
 			Msg("- Uninitialized light position.");
@@ -232,116 +233,141 @@ Fvector	light::spatial_sector_point()
 	return position; 
 }
 
-//////////////////////////////////////////////////////////////////////////
-#if (RENDER==R_R2) || (RENDER==R_R3)
+#if (RENDER == R_R2) || (RENDER == R_R3)
 // Xforms
-void	light::xform_calc			()
+void light::xform_calc()
 {
-	if	(Device.dwFrame == m_xform_frame)	return;
-	m_xform_frame	= Device.dwFrame;
+	if (Device.dwFrame == m_xform_frame)
+		return;
+	m_xform_frame = Device.dwFrame;
 
 	// build final rotation / translation
-	Fvector					L_dir,L_up,L_right;
+	Fvector L_dir, L_up, L_right;
 
 	// dir
-	L_dir.set				(direction);
-	float l_dir_m			= L_dir.magnitude();
-	if (_valid(l_dir_m) && l_dir_m>EPS_S)	L_dir.div(l_dir_m);
-	else									L_dir.set(0,0,1);
+	L_dir.set(direction);
+	float l_dir_m = L_dir.magnitude();
+	if (_valid(l_dir_m) && l_dir_m > EPS_S)
+		L_dir.div(l_dir_m);
+	else
+		L_dir.set(0, 0, 1);
 
 	// R&N
-	if (right.square_magnitude()>EPS)				{
+	if (right.square_magnitude() > EPS)				
+	{
 		// use specified 'up' and 'right', just enshure ortho-normalization
-		L_right.set					(right);				L_right.normalize	();
-		L_up.crossproduct			(L_dir,L_right);		L_up.normalize		();
-		L_right.crossproduct		(L_up,L_dir);			L_right.normalize	();
-	} else {
+		L_right.set(right);
+		L_right.normalize();
+		L_up.crossproduct(L_dir, L_right);
+		L_up.normalize();
+		L_right.crossproduct(L_up, L_dir);
+		L_right.normalize();
+	} 
+	else 
+	{
 		// auto find 'up' and 'right' vectors
-		L_up.set					(0,1,0);				if (_abs(L_up.dotproduct(L_dir))>.99f)	L_up.set(0,0,1);
-		L_right.crossproduct		(L_up,L_dir);			L_right.normalize	();
-		L_up.crossproduct			(L_dir,L_right);		L_up.normalize		();
+		L_up.set(0, 1, 0);
+		if (_abs(L_up.dotproduct(L_dir)) > .99f)
+			L_up.set(0, 0, 1);
+		L_right.crossproduct(L_up, L_dir);
+		L_right.normalize();
+		L_up.crossproduct(L_dir, L_right);
+		L_up.normalize();
 	}
 
 	// matrix
-	Fmatrix					mR;
-	mR.i					= L_right;	mR._14	= 0;
-	mR.j					= L_up;		mR._24	= 0;
-	mR.k					= L_dir;	mR._34	= 0;
-	mR.c					= position;	mR._44	= 1;
+	Fmatrix mR;
+	mR.i = L_right;
+	mR._14 = 0;
+	mR.j = L_up;
+	mR._24 = 0;
+	mR.k = L_dir;
+	mR._34 = 0;
+	mR.c = position;
+	mR._44 = 1;
 
 	// switch
-	switch(flags.type)	{
-	case IRender_Light::REFLECTED	:
-	case IRender_Light::POINT		:
+	switch (flags.type)	
+	{
+	case IRender_Light::REFLECTED:
+	case IRender_Light::POINT:
 		{
 			// scale of identity sphere
-			float		L_R			= range;
-			Fmatrix		mScale;		mScale.scale	(L_R,L_R,L_R);
-			m_xform.mul_43			(mR,mScale);
+			float L_R = range;
+			Fmatrix mScale;
+			mScale.scale(L_R, L_R, L_R);
+			m_xform.mul_43(mR, mScale);
 		}
 		break;
-	case IRender_Light::SPOT		:
+	case IRender_Light::SPOT:
 		{
 			// scale to account range and angle
-			float		s			= 2.f*range*tanf(cone/2.f);	
-			Fmatrix		mScale;		mScale.scale(s,s,range);	// make range and radius
-			m_xform.mul_43			(mR,mScale);
+			float s = 2.f * range * tanf(cone / 2.f);	
+			Fmatrix mScale;
+			mScale.scale(s, s, range);	// make range and radius
+			m_xform.mul_43(mR, mScale);
 		}
 		break;
-	case IRender_Light::OMNIPART	:
+	case IRender_Light::OMNIPART:
 		{
-			float		L_R			= 2*range;		// volume is half-radius
-			Fmatrix		mScale;		mScale.scale	(L_R,L_R,L_R);
-			m_xform.mul_43			(mR,mScale);
+			float L_R = 2 * range;		// volume is half-radius
+			Fmatrix mScale;
+			mScale.scale(L_R, L_R, L_R);
+			m_xform.mul_43(mR, mScale);
 		}
 		break;
 	default:
-		m_xform.identity	();
+		m_xform.identity();
 		break;
 	}
 }
 
-//								+X,				-X,				+Y,				-Y,			+Z,				-Z
-static	Fvector cmNorm[6]	= {{0.f,1.f,0.f}, {0.f,1.f,0.f}, {0.f,0.f,-1.f},{0.f,0.f,1.f}, {0.f,1.f,0.f}, {0.f,1.f,0.f}};
-static	Fvector cmDir[6]	= {{1.f,0.f,0.f}, {-1.f,0.f,0.f},{0.f,1.f,0.f}, {0.f,-1.f,0.f},{0.f,0.f,1.f}, {0.f,0.f,-1.f}};
+//								    +X,				 -X,				+Y,				-Y,			 +Z,				-Z
+static Fvector cmNorm[6] = { {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, 0.f, -1.f}, {0.f, 0.f, 1.f}, {0.f, 1.f, 0.f}, {0.f, 1.f, 0.f} };
+static Fvector cmDir[6] = { {1.f, 0.f, 0.f}, {-1.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, {0.f, -1.f, 0.f}, {0.f, 0.f, 1.f}, {0.f, 0.f, -1.f} };
 
-void	light::export_to		(light_Package& package)
+void light::export_to(light_Package& package)
 {
-	if (flags.bShadow)			{
-		switch (flags.type)	{
+	if (flags.bShadow)			
+	{
+		switch (flags.type)	
+		{
 			case IRender_Light::POINT:
 				{
 					// tough: create/update 6 shadowed lights
-					if (0==omnipart[0])	for (int f=0; f<6; f++)	omnipart[f] = xr_new<light> ();
-					for (int f=0; f<6; f++)	{
-						light*	L			= omnipart[f];
-						Fvector				R;
-						R.crossproduct		(cmNorm[f],cmDir[f]);
-						L->set_type			(IRender_Light::OMNIPART);
-						L->set_shadow		(true);
-						L->set_position		(position);
-						L->set_rotation		(cmDir[f],	R);
-						L->set_cone			(PI_DIV_2);
-						L->set_range		(range);
-						L->set_color		(color);
-						L->spatial.sector	= spatial.sector;	//. dangerous?
-						L->s_spot			= s_spot	;
-						L->s_point			= s_point	;
+					if (0 == omnipart[0])
+						for (int f = 0; f < 6; f++)
+							omnipart[f] = xr_new<light>();
+					for (int f = 0; f < 6; f++)	
+					{
+						light* L = omnipart[f];
+						Fvector R;
+						R.crossproduct(cmNorm[f], cmDir[f]);
+						L->set_type(IRender_Light::OMNIPART);
+						L->set_shadow(true);
+						L->set_position(position);
+						L->set_rotation(cmDir[f], R);
+						L->set_cone(PI_DIV_2);
+						L->set_range(range);
+						L->set_virtual_size(virtual_size);
+						L->set_color(color);
+						L->spatial.sector = spatial.sector;	//. dangerous?
+						L->s_spot = s_spot;
+						L->s_point = s_point;
 						
 						// Holger - do we need to export msaa stuff as well ?
-#if	RENDER==R_R3
-						if( RImplementation.o.dx10_msaa )
+#if	RENDER == R_R3
+						if (RImplementation.o.dx10_msaa)
 						{
 							int bound = 1;
 
-							if( !RImplementation.o.dx10_msaa_opt )
+							if (!RImplementation.o.dx10_msaa_opt)
 								bound = RImplementation.o.dx10_msaa_samples;
 
-							for( int i = 0; i < bound; ++i )
+							for (int i = 0; i < bound; ++i)
 							{
 								L->s_point_msaa[i] = s_point_msaa[i];
 								L->s_spot_msaa[i] = s_spot_msaa[i];
-								//L->s_volumetric_msaa[i] = s_volumetric_msaa[i];
 							}
 						}
 #endif	//	RENDER!=R_R3
@@ -352,18 +378,25 @@ void	light::export_to		(light_Package& package)
 						L->set_volumetric_intensity(m_volumetric_intensity);
 						L->set_volumetric_distance(m_volumetric_distance);
 
-						package.v_shadowed.push_back	(L);
+						package.v_shadowed.push_back(L);
 					}
 				}
 				break;
 			case IRender_Light::SPOT:
-				package.v_shadowed.push_back			(this);
+				package.v_shadowed.push_back(this);
 				break;
 		}
-	}	else	{
-		switch (flags.type)	{
-			case IRender_Light::POINT:		package.v_point.push_back	(this);	break;
-			case IRender_Light::SPOT:		package.v_spot.push_back	(this);	break;
+	}	
+	else	
+	{
+		switch (flags.type)	
+		{
+			case IRender_Light::POINT:
+				package.v_point.push_back(this);
+				break;
+			case IRender_Light::SPOT:
+				package.v_spot.push_back(this);
+				break;
 		}
 	}
 }
