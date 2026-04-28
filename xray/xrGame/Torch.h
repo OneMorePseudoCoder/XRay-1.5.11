@@ -47,9 +47,11 @@ public:
 
 			void Switch();
 			void Switch(bool light_on);
+			bool torch_active() const;
 
 	virtual bool can_be_attached() const;
 			void calc_m_delta_h(float range);
+			float get_range() const;
 
 	//CAttachableItem
 	virtual	void enable(bool value);
@@ -58,7 +60,6 @@ public:
 			void SwitchNightVision();
 			void SwitchNightVision(bool light_on);
 			void UpdateSwitchNightVision();
-			float NightVisionBattery();
 
 			bool GetNightVisionStatus() { return m_bNightVisionOn; }
 protected:
@@ -75,7 +76,6 @@ protected:
 	};
 
 public:
-
 	virtual bool use_parent_ai_locations() const
 	{
 		return (!H_Parent());

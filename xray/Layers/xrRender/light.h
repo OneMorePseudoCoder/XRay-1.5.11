@@ -144,6 +144,8 @@ public:
 	void set_attenuation_params(float a0, float a1, float a2, float fo);
 #endif
 
+	float get_range() const override { return range; };
+	
 	float get_LOD();
 
 	light();
