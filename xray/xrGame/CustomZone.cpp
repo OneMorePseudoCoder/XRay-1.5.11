@@ -156,11 +156,11 @@ void CCustomZone::Load(LPCSTR section)
 		m_sHitParticlesBig = pSettings->r_string(section, "hit_big_particles");
 
 	if (pSettings->line_exist(section, "idle_small_particles")) 
-		m_sIdleObjectParticlesBig = pSettings->r_string(section, "idle_big_particles");
+		m_sIdleObjectParticlesSmall = pSettings->r_string(section, "idle_small_particles");
 	
 	if (pSettings->line_exist(section, "idle_big_particles")) 
-		m_sIdleObjectParticlesSmall = pSettings->r_string(section," idle_small_particles");
-	
+		m_sIdleObjectParticlesBig = pSettings->r_string(section, "idle_big_particles");	
+
 	if (pSettings->line_exist(section, "idle_particles_dont_stop"))
 		m_zone_flags.set(eIdleObjectParticlesDontStop, pSettings->r_bool(section, "idle_particles_dont_stop"));
 
@@ -206,7 +206,7 @@ void CCustomZone::Load(LPCSTR section)
 
 	if (pSettings->line_exist(section, "blowout_sound_time")) 
 	{
-		m_dwBlowoutSoundTime = pSettings->r_u32(section,"blowout_sound_time");
+		m_dwBlowoutSoundTime = pSettings->r_u32(section, "blowout_sound_time");
 		if (s32(m_dwBlowoutSoundTime) > m_StateTime[eZoneStateBlowout])
 		{
 			m_dwBlowoutSoundTime = m_StateTime[eZoneStateBlowout];
