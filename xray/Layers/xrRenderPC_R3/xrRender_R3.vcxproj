@@ -574,6 +574,7 @@
     <ClInclude Include="..\xrRender\r__occlusion.h" />
     <ClInclude Include="..\xrRender\r__pixel_calculator.h" />
     <ClInclude Include="..\xrRender\r__sector.h" />
+    <ClInclude Include="..\xrRender\r__types.h" />
     <ClInclude Include="..\xrRender\GlowManager.h" />
     <ClInclude Include="..\xrRender\Shader.h" />
     <ClInclude Include="..\xrRender\SH_Atomic.h" />
@@ -615,7 +616,6 @@
     <ClInclude Include="light.h" />
     <ClInclude Include="light_gi.h" />
     <ClInclude Include="pch\stdafx.h" />
-    <ClInclude Include="r3_types.h" />
     <ClInclude Include="r3.h" />
     <ClInclude Include="r3_rendertarget.h" />
     <ClInclude Include="r3_rendertarget_wallmarks.h" />

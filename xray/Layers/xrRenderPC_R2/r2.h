@@ -2,10 +2,9 @@
 
 #include "../xrRender/r__dsgraph_structure.h"
 #include "../xrRender/r__occlusion.h"
-
+#include "../xrRender/r__types.h"
 #include "../xrRender/PSLibrary.h"
 
-#include "r2_types.h"
 #include "r2_rendertarget.h"
 
 #include "../xrRender/HOM.h"

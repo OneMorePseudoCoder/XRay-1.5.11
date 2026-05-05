@@ -555,6 +555,7 @@
     <ClInclude Include="..\xrRender\r__occlusion.h" />
     <ClInclude Include="..\xrRender\r__pixel_calculator.h" />
     <ClInclude Include="..\xrRender\r__sector.h" />
+    <ClInclude Include="..\xrRender\r__types.h" />
     <ClInclude Include="..\xrRender\GlowManager.h" />
     <ClInclude Include="..\xrRender\Shader.h" />
     <ClInclude Include="..\xrRender\SH_Atomic.h" />
@@ -597,7 +598,6 @@
     <ClInclude Include="r2.h" />
     <ClInclude Include="r2_rendertarget.h" />
     <ClInclude Include="r2_rendertarget_wallmarks.h" />
-    <ClInclude Include="r2_types.h" />
     <ClInclude Include="SMAP_Allocator.h" />
   </ItemGroup>
   <ItemGroup>

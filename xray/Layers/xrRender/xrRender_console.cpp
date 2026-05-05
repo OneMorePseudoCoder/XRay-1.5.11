@@ -207,9 +207,8 @@ float ps_r3_dyn_wet_surf_near = 10.f;
 float ps_r3_dyn_wet_surf_far = 30.f;
 int ps_r3_dyn_wet_surf_sm_res = 256;
 
-//- Mad Max
-float ps_r2_gloss_factor = 3.0f;
-//- Mad Max
+float ps_r2_gloss_factor = 10.0f;
+float ps_r2_gloss_min = 0.0f;
 
 Flags32 ps_common_flags = { 0 };
 
@@ -685,9 +684,8 @@ void xrRender_initconsole()
 	CMD4(CCC_Float, "r2_zfill_depth", &ps_r2_zfill, .001f, .5f);
 	CMD3(CCC_Mask, "r2_allow_r1_lights", &ps_r2_ls_flags, R2FLAG_R1LIGHTS);
 
-	//- Mad Max
-	CMD4(CCC_Float, "r2_gloss_factor", &ps_r2_gloss_factor, .0f, 10.f);
-	//- Mad Max
+	CMD4(CCC_Float, "r2_gloss_factor", &ps_r2_gloss_factor, .0f, 50.f);
+	CMD4(CCC_Float, "r2_gloss_min", &ps_r2_gloss_min, .001f, 1.0f);
 
 #ifdef DEBUG
 	CMD3(CCC_Mask, "r2_use_nvdbt", &ps_r2_ls_flags, R2FLAG_USE_NVDBT);
