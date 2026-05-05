@@ -110,6 +110,11 @@ float ps_r__ssaLOD_B = 32.f;
 float ps_r__tf_Mipbias = -0.5f;
 int ps_r__tf_Anisotropic = 4;
 
+// Geometry optimization from Anomaly
+int opt_static = 0;
+int opt_dynamic = 0;
+float ps_r__opt_dist = 100.f;
+
 // R1
 Flags32 ps_r1_flags = { R1FLAG_DLIGHTS };
 float ps_r1_lmodel_lerp = 0.1f;
@@ -636,6 +641,13 @@ void xrRender_initconsole()
 	CMD4(CCC_detail_radius, "r__detail_radius", &ps_r__detail_radius, 49, 250);
 	CMD3(CCC_Mask, "r__actor_shadow", &ps_common_flags, RFLAG_ACTOR_SHADOW);
 	CMD3(CCC_Mask, "r__glow", &ps_common_flags, RFLAG_GLOWS);
+
+	// Geometry optimization
+	CMD4(CCC_Integer, "r__optimize_static_geom", &opt_static, 0, 4);
+	CMD4(CCC_Integer, "r__optimize_dynamic_geom", &opt_dynamic, 0, 4);
+	psDeviceFlags.set(RFLAF_OPT_GEOM, TRUE);
+	CMD3(CCC_Mask, "r__optimize_shadow_geom", &psDeviceFlags, RFLAF_OPT_GEOM);
+	CMD4(CCC_Float, "r__dyn_opt_dist", &ps_r__opt_dist, 100.0f, 1000.0f);
 
 	// R1
 	CMD4(CCC_Float, "r1_lmodel_lerp", &ps_r1_lmodel_lerp, 0, 0.333f);

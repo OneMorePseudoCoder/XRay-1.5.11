@@ -14,7 +14,7 @@
 CRender RImplementation;
 
 float r_dtex_range = 50.f;
-ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual *pVisual, float cdist_sq)
+ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual* pVisual, float cdist_sq)
 {
 	int id = SE_R2_SHADOW;
 	if (CRender::PHASE_NORMAL == RImplementation.phase)
@@ -24,7 +24,7 @@ ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual *pVisual, float c
 	return pVisual->shader->E[id]._get();
 }
 
-ShaderElement* CRender::rimp_select_sh_static(dxRender_Visual *pVisual, float cdist_sq)
+ShaderElement* CRender::rimp_select_sh_static(dxRender_Visual* pVisual, float cdist_sq)
 {
 	int id = SE_R2_SHADOW;
 	if (CRender::PHASE_NORMAL == RImplementation.phase)
@@ -549,9 +549,9 @@ BOOL CRender::occ_visible(Fbox& P)
 	return HOM.visible(P);
 }
 
-void CRender::add_Visual(IRenderVisual* V)
+void CRender::add_Visual(IRenderVisual* V, bool ignore_opt)
 { 
-	add_leafs_Dynamic((dxRender_Visual*)V);
+	add_leafs_Dynamic((dxRender_Visual*)V, ignore_opt);
 }
 
 void CRender::add_Geometry(IRenderVisual* V)
@@ -567,10 +567,10 @@ void CRender::add_StaticWallmark(ref_shader& S, const Fvector& P, float s, CDB::
 	Wallmarks->AddStaticWallmark(T, verts, P, &*S, s);
 }
 
-void CRender::add_StaticWallmark(IWallMarkArray *pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V)
+void CRender::add_StaticWallmark(IWallMarkArray* pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V)
 {
-	dxWallMarkArray *pWMA = (dxWallMarkArray *)pArray;
-	ref_shader *pShader = pWMA->dxGenerateWallmark();
+	dxWallMarkArray *pWMA = (dxWallMarkArray*)pArray;
+	ref_shader* pShader = pWMA->dxGenerateWallmark();
 	if (pShader)
 		add_StaticWallmark(*pShader, P, s, T, V);
 }

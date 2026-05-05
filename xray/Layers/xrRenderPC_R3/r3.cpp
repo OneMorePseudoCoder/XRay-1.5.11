@@ -19,7 +19,7 @@ CRender RImplementation;
 
 float r_dtex_range = 50.f;
 
-ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual *pVisual, float cdist_sq)
+ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual* pVisual, float cdist_sq)
 {
 	int id = SE_R2_SHADOW;
 	if	(CRender::PHASE_NORMAL == RImplementation.phase)
@@ -29,12 +29,12 @@ ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual *pVisual, float c
 	return pVisual->shader->E[id]._get();
 }
 
-ShaderElement* CRender::rimp_select_sh_static(dxRender_Visual *pVisual, float cdist_sq)
+ShaderElement* CRender::rimp_select_sh_static(dxRender_Visual* pVisual, float cdist_sq)
 {
 	int id = SE_R2_SHADOW;
 	if	(CRender::PHASE_NORMAL == RImplementation.phase)
 	{
-		id = ((_sqrt(cdist_sq)-pVisual->vis.sphere.R)<r_dtex_range) ? SE_R2_NORMAL_HQ : SE_R2_NORMAL_LQ;
+		id = ((_sqrt(cdist_sq)-pVisual->vis.sphere.R) < r_dtex_range) ? SE_R2_NORMAL_HQ : SE_R2_NORMAL_LQ;
 	}
 	return pVisual->shader->E[id]._get();
 }
@@ -656,9 +656,9 @@ BOOL CRender::occ_visible(Fbox& P)
 	return HOM.visible(P);
 }
 
-void CRender::add_Visual(IRenderVisual* V)
+void CRender::add_Visual(IRenderVisual* V, bool ignore_opt)
 { 
-	add_leafs_Dynamic((dxRender_Visual*)V);
+	add_leafs_Dynamic((dxRender_Visual*)V, ignore_opt);
 }
 
 void CRender::add_Geometry(IRenderVisual* V)

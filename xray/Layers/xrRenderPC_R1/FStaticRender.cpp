@@ -19,7 +19,7 @@ using namespace R_dsgraph;
 
 CRender RImplementation;
 
-ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual *pVisual, float cdist_sq)
+ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual* pVisual, float cdist_sq)
 {
 	switch (phase)		
 	{
@@ -37,7 +37,7 @@ ShaderElement* CRender::rimp_select_sh_dynamic(dxRender_Visual *pVisual, float c
 #endif
 }
 
-ShaderElement* CRender::rimp_select_sh_static(dxRender_Visual *pVisual, float cdist_sq)
+ShaderElement* CRender::rimp_select_sh_static(dxRender_Visual* pVisual, float cdist_sq)
 {
 	switch (phase)		
 	{
@@ -75,6 +75,7 @@ void CRender::create()
 		o.distortion = TRUE;
 	else
 		o.distortion = FALSE;
+
 	if (strstr(Core.Params, "-nodistort"))
 		o.distortion = FALSE;
 
@@ -180,7 +181,7 @@ void CRender::model_Delete(IRenderVisual* &V, BOOL bDiscard)
 
 IRender_DetailModel* CRender::model_CreateDM(IReader* F)
 {
-	CDetail* D = xr_new<CDetail> ();
+	CDetail* D = xr_new<CDetail>();
 	D->Load(F);
 	return D;
 }
@@ -315,10 +316,10 @@ BOOL CRender::occ_visible(Fbox& P)
 }
 
 ENGINE_API extern BOOL g_bRendering;
-void CRender::add_Visual(IRenderVisual* V)
+void CRender::add_Visual(IRenderVisual* V, bool ignore_opt)
 {
 	VERIFY(g_bRendering);
-	add_leafs_Dynamic((dxRender_Visual*)V);									
+    add_leafs_Dynamic((dxRender_Visual*)V, ignore_opt);
 }
 
 void CRender::add_Geometry(IRenderVisual* V)
@@ -366,8 +367,8 @@ void CRender::add_SkeletonWallmark(const Fmatrix* xf, CKinematics* obj, ref_shad
 
 void CRender::add_SkeletonWallmark(const Fmatrix* xf, IKinematics* obj, IWallMarkArray *pArray, const Fvector& start, const Fvector& dir, float size)
 {
-	dxWallMarkArray *pWMA = (dxWallMarkArray*)pArray;
-	ref_shader *pShader = pWMA->dxGenerateWallmark();
+	dxWallMarkArray* pWMA = (dxWallMarkArray*)pArray;
+	ref_shader* pShader = pWMA->dxGenerateWallmark();
 	if (pShader)
 		add_SkeletonWallmark(xf, (CKinematics*)obj, *pShader, start, dir, size);
 }

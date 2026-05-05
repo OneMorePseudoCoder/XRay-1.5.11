@@ -30,7 +30,10 @@ extern ECORE_API float ps_r__ssaLOD_B;
 extern ECORE_API float ps_r__tf_Mipbias;
 
 extern ECORE_API int ps_r__detail_radius;
-extern ECORE_API Flags32 ps_common_flags;
+
+extern ECORE_API int opt_static;
+extern ECORE_API int opt_dynamic;
+extern ECORE_API float ps_r__opt_dist;
 
 enum
 {
@@ -38,7 +41,9 @@ enum
 	RFLAG_ACTOR_SHADOW = (1 << 1),
     // ZergO: new flags
     RFLAG_GLOWS = (1 << 2),
+    RFLAF_OPT_GEOM = (1 << 3),
 };
+extern ECORE_API Flags32 ps_common_flags;
 
 // R1
 extern ECORE_API float ps_r1_lmodel_lerp;

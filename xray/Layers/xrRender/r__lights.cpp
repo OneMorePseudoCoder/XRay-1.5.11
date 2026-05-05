@@ -9,6 +9,24 @@ IC bool pred_area(light* _1, light* _2)
 
 void CRender::render_lights(light_Package& LP)
 {
+    auto isLightVisible = [&](light* L) -> bool 
+	{
+        Fvector toLight;
+        toLight.sub(L->position, Device.vCameraPosition);
+        float distance = toLight.magnitude();
+        toLight.normalize();
+
+        if (distance > ps_r__opt_dist)
+            return false;
+
+        Fvector cameraDirection = Device.vCameraDirection;
+        float dotProduct = cameraDirection.dotproduct(toLight);
+        if (dotProduct < 0 && distance > L->range)
+            return false;
+
+        return true;
+    };
+
 	//////////////////////////////////////////////////////////////////////////
 	// Refactor order based on ability to pack shadow-maps
 	// 1. calculate area + sort in descending order
@@ -17,9 +35,9 @@ void CRender::render_lights(light_Package& LP)
 		for (u32 it = 0; it < source.size(); it++)
 		{
 			light* L = source[it];
-			if	(!L->vis.visible)	
+			if (!L->vis.visible || !isLightVisible(L))	
 			{
-				source.erase(source.begin()+it);
+				source.erase(source.begin() + it);
 				it--;
 			} 
 			else 
@@ -193,8 +211,8 @@ void CRender::render_lights(light_Package& LP)
 			PIX_EVENT(ACCUM_VOLUMETRIC);
 #endif
 			if (RImplementation.o.advancedpp && ps_r2_ls_flags.is(R2FLAG_VOLUMETRIC_LIGHTS))
-			for (u32 it = 0; it < L_spot_s.size(); it++)
-				Target->accum_volumetric(L_spot_s[it]);
+				for (u32 it = 0; it < L_spot_s.size(); it++)
+					Target->accum_volumetric(L_spot_s[it]);
 
 			L_spot_s.clear();
 		}
@@ -220,7 +238,7 @@ void CRender::render_lights(light_Package& LP)
 	PIX_EVENT(SPOT_LIGHTS_ACCUM);
 #endif
 	// Spot lighting (unshadowed, if left)
-	if (!LP.v_spot.empty())		
+	if (!LP.v_spot.empty())
 	{
 		xr_vector<light*>& Lvec = LP.v_spot;
 		for	(u32 pid = 0; pid < Lvec.size(); pid++)
