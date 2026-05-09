@@ -258,7 +258,7 @@
     <ClInclude Include="..\xrRender\Light_DB.h">
       <Filter>Lights</Filter>
     </ClInclude>
-    <ClInclude Include="light_gi.h">
+    <ClInclude Include="..\xrRender\light_GI.h">
       <Filter>Lights</Filter>
     </ClInclude>
     <ClInclude Include="..\xrRender\Light_Package.h">
@@ -860,7 +860,7 @@
     <ClCompile Include="..\xrRender\Light_DB.cpp">
       <Filter>Lights</Filter>
     </ClCompile>
-    <ClCompile Include="light_GI.cpp">
+    <ClCompile Include="..\xrRender\light_GI.cpp">
       <Filter>Lights</Filter>
     </ClCompile>
     <ClCompile Include="..\xrRender\Light_Package.cpp">

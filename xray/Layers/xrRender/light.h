@@ -20,9 +20,9 @@ public:
 		u32 bShadow : 1;
 		u32 bVolumetric : 1;
 		u32 bHudMode : 1;
-
-	}				
+	}	
 	flags;
+
 	Fvector position;
 	Fvector direction;
 	Fvector right;
