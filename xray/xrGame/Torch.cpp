@@ -21,11 +21,11 @@
 static const float TORCH_INERTION_CLAMP = PI_DIV_6;
 static const float TORCH_INERTION_SPEED_MAX	= 7.5f;
 static const float TORCH_INERTION_SPEED_MIN	= 0.5f;
-static const Fvector TORCH_OFFSET = {-0.2f, +0.1f, -0.3f};
-static const Fvector OMNI_OFFSET = {-0.2f, +0.1f, -0.1f};
+static const Fvector TORCH_OFFSET = { -0.2f, +0.1f, -0.3f };
+static const Fvector OMNI_OFFSET = { -0.2f, +0.1f, -0.1f };
 static const float OPTIMIZATION_DISTANCE = 100.f;
 
-static bool stalker_use_dynamic_lights	= false;
+static bool stalker_use_dynamic_lights = false;
 
 CTorch::CTorch(void) 
 {
@@ -57,7 +57,7 @@ inline bool CTorch::can_use_dynamic_lights()
 	if (!H_Parent())
 		return (true);
 
-	CInventoryOwner *owner = smart_cast<CInventoryOwner*>(H_Parent());
+	CInventoryOwner* owner = smart_cast<CInventoryOwner*>(H_Parent());
 	if (!owner)
 		return (true);
 
@@ -68,7 +68,6 @@ void CTorch::Load(LPCSTR section)
 {
 	inherited::Load(section);
 	light_trace_bone = pSettings->r_string(section, "light_trace_bone");
-
 
 	m_bNightVisionEnabled = !!pSettings->r_bool(section, "night_vision");
 	if (m_bNightVisionEnabled)
@@ -107,7 +106,7 @@ void CTorch::SwitchNightVision(bool vision_on)
 	u32 cnt = _GetItemCount(disabled_names);
 	bool b_allow = true;
 	string512 tmp;
-	for(u32 i = 0; i < cnt; ++i)
+	for (u32 i = 0; i < cnt; ++i)
 	{
 		_GetItem(disabled_names, i, tmp);
 		if (0 == stricmp(tmp, curr_map))
@@ -149,7 +148,6 @@ void CTorch::SwitchNightVision(bool vision_on)
 	}
 }
 
-
 void CTorch::UpdateSwitchNightVision()
 {}
 
@@ -184,10 +182,15 @@ void CTorch::Switch(bool light_on)
 	}
 }
 
+bool CTorch::torch_active() const 
+{ 
+	return (m_switched_on);
+}
+
 BOOL CTorch::net_Spawn(CSE_Abstract* DC) 
 {
-	CSE_Abstract *e = (CSE_Abstract*)(DC);
-	CSE_ALifeItemTorch *torch = smart_cast<CSE_ALifeItemTorch*>(e);
+	CSE_Abstract* e = (CSE_Abstract*)(DC);
+	CSE_ALifeItemTorch* torch = smart_cast<CSE_ALifeItemTorch*>(e);
 	R_ASSERT(torch);
 	cNameVisual_set(torch->get_visual());
 
@@ -285,7 +288,7 @@ void CTorch::UpdateCL()
 			// near camera
 			smart_cast<IKinematics*>(H_Parent()->Visual())->CalculateBones();
 			M.mul_43(XFORM(), BI.mTransform);
-		} 
+		}
 		else 
 		{
 			// approximately the same
@@ -294,12 +297,12 @@ void CTorch::UpdateCL()
 			M.c.y += H_Parent()->Radius() * 2.f / 3.f;
 		}
 
-		if (actor) 
+		if (actor)
 		{
-			m_prev_hp.x = angle_inertion_var(m_prev_hp.x, -actor->cam_FirstEye()->yaw, TORCH_INERTION_SPEED_MIN, TORCH_INERTION_SPEED_MAX, TORCH_INERTION_CLAMP, Device.fTimeDelta);
-			m_prev_hp.y = angle_inertion_var(m_prev_hp.y, -actor->cam_FirstEye()->pitch, TORCH_INERTION_SPEED_MIN, TORCH_INERTION_SPEED_MAX, TORCH_INERTION_CLAMP, Device.fTimeDelta);
+			m_prev_hp.x = angle_inertion_var(m_prev_hp.x, -actor->cam_Active()->yaw, TORCH_INERTION_SPEED_MIN, TORCH_INERTION_SPEED_MAX, TORCH_INERTION_CLAMP, Device.fTimeDelta);
+			m_prev_hp.y = angle_inertion_var(m_prev_hp.y, -actor->cam_Active()->pitch, TORCH_INERTION_SPEED_MIN, TORCH_INERTION_SPEED_MAX, TORCH_INERTION_CLAMP, Device.fTimeDelta);
 
-			Fvector dir, right, up;	
+			Fvector dir, right, up;
 			dir.setHP(m_prev_hp.x + m_delta_h, m_prev_hp.y);
 			Fvector::generate_orthonormal_basis_normalized(dir, up, right);
 
@@ -347,7 +350,7 @@ void CTorch::UpdateCL()
 			m_switched_on = false;
 			light_render->set_active(false);
 			light_omni->set_active(false);
-			glow_render->set_active	(false);
+			glow_render->set_active(false);
 		}
 	}
 
@@ -395,7 +398,7 @@ void CTorch::net_Export(NET_Packet& P)
 	BYTE F = 0;
 	F |= (m_switched_on ? eTorchActive : 0);
 	F |= (m_bNightVisionOn ? eNightVisionActive : 0);
-	const CActor *pA = smart_cast<const CActor*>(H_Parent());
+	const CActor* pA = smart_cast<const CActor*>(H_Parent());
 	if (pA)
 	{
 		if (pA->attached(this))
@@ -421,7 +424,7 @@ void CTorch::net_Import(NET_Packet& P)
 
 bool CTorch::can_be_attached() const
 {
-	const CActor *pA = smart_cast<const CActor*>(H_Parent());
+	const CActor* pA = smart_cast<const CActor*>(H_Parent());
 	if (pA) 
 	{
 		if ((const CTorch*)smart_cast<CTorch*>(pA->inventory().m_slots[GetSlot()].m_pIItem) == this)
@@ -454,4 +457,9 @@ void CTorch::enable(bool value)
 
 	if (!enabled() && m_switched_on)
 		Switch(false);
+}
+
+float CTorch::get_range() const 
+{
+	return light_render->get_range();
 }
