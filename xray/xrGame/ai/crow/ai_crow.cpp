@@ -148,6 +148,8 @@ BOOL CAI_Crow::net_Spawn		(CSE_Abstract* DC)
 	m_Anims.m_fly.Load			(M,"fly_fwd");
 	m_Anims.m_idle.Load			(M,"fly_idle");
 
+	renderable.visual->_ignore_optimization = true;
+
 	// disable UpdateCL, enable only on HIT
 	processing_deactivate		();
 	VERIFY2( valid_pos( Position() ), dbg_valide_pos_string(Position(),this,"CAI_Crow::net_Spawn") );
