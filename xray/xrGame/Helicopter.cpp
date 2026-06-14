@@ -132,7 +132,7 @@ void CollisionCallbackAlife(bool& do_colide, bool bo1, dContact& c, SGameMtl* ma
 	do_colide = false; 
 }
 
-void ContactCallbackAlife(CDB::TRI* T,dContactGeom* c)
+void ContactCallbackAlife(CDB::TRI* T, dContactGeom* c)
 {}
 
 BOOL CHelicopter::net_Spawn(CSE_Abstract* DC)

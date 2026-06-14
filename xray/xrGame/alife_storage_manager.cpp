@@ -92,7 +92,7 @@ void CALifeStorageManager::save(LPCSTR save_name, bool update_name)
 		strcpy_s(m_save_name, save);
 }
 
-void CALifeStorageManager::load	(void *buffer, const u32 &buffer_size, LPCSTR file_name)
+void CALifeStorageManager::load(void *buffer, const u32 &buffer_size, LPCSTR file_name)
 {
 	IReader source(buffer, buffer_size);
 	header().load(source);

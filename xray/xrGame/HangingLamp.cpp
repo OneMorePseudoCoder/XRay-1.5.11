@@ -219,7 +219,7 @@ void CHangingLamp::UpdateCL()
 
 	if (Alive() && light_render->get_active())
 	{
-		if(Visual())
+		if (Visual())
 			PKinematics(Visual())->CalculateBones();
 
 		// update T&R from light (main) bone
