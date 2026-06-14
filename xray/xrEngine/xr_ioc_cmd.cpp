@@ -1,26 +1,22 @@
 #include "stdafx.h"
 #include "igame_level.h"
-
-//#include "xr_effgamma.h"
 #include "x_ray.h"
 #include "xr_ioconsole.h"
 #include "xr_ioc_cmd.h"
-//#include "fbasicvisual.h"
 #include "cameramanager.h"
 #include "environment.h"
 #include "xr_input.h"
 #include "CustomHUD.h"
-
 #include "../Include/xrRender/RenderDeviceRender.h"
-
 #include "xr_object.h"
 
-xr_token*							vid_quality_token = NULL;
+xr_token* vid_quality_token = NULL;
 
-xr_token							vid_bpp_token							[ ]={
-	{ "16",							16											},
-	{ "32",							32											},
-	{ 0,							0											}
+xr_token vid_bpp_token[] = 
+{
+	{ "16", 16 },
+	{ "32", 32 },
+	{ 0, 0 }
 };
 //-----------------------------------------------------------------------
 
@@ -715,25 +711,20 @@ void CCC_Register()
 	CMD4(CCC_Integer,	"r__supersample",		&ps_r__Supersample,			1,		4		);
 
 
-	CMD3(CCC_Mask,		"rs_v_sync",			&psDeviceFlags,		rsVSync				);
-//	CMD3(CCC_Mask,		"rs_disable_objects_as_crows",&psDeviceFlags,	rsDisableObjectsAsCrows	);
-	CMD3(CCC_Mask,		"rs_fullscreen",		&psDeviceFlags,		rsFullscreen			);
-	CMD3(CCC_Mask,		"rs_refresh_60hz",		&psDeviceFlags,		rsRefresh60hz			);
-	CMD3(CCC_Mask,		"rs_stats",				&psDeviceFlags,		rsStatistic				);
-	CMD4(CCC_Float,		"rs_vis_distance",		&psVisDistance,		0.4f,	1.5f			);
-
-	CMD3(CCC_Mask,		"rs_cam_pos",			&psDeviceFlags,		rsCameraPos				);
+	CMD3(CCC_Mask, "rs_v_sync", &psDeviceFlags, rsVSync);
+	CMD3(CCC_Mask, "rs_fullscreen", &psDeviceFlags, rsFullscreen);
+	CMD3(CCC_Mask, "rs_refresh_60hz", &psDeviceFlags, rsRefresh60hz);
+	CMD3(CCC_Mask, "rs_stats", &psDeviceFlags, rsStatistic);
+    CMD3(CCC_Mask, "rs_fps", &psDeviceFlags, rsFPS);
+	CMD4(CCC_Float, "rs_vis_distance", &psVisDistance, 0.4f, 1.5f);
+	CMD3(CCC_Mask, "rs_cam_pos", &psDeviceFlags, rsCameraPos);
 
 	CMD3(CCC_Mask,		"rs_occ_draw",			&psDeviceFlags,		rsOcclusionDraw			);
 	CMD3(CCC_Mask,		"rs_occ_stats",			&psDeviceFlags,		rsOcclusionStats		);
-	//CMD4(CCC_Integer,	"rs_skeleton_update",	&psSkeletonUpdate,	2,		128	);
-
 
 	CMD2(CCC_Gamma,		"rs_c_gamma"			,&ps_gamma			);
 	CMD2(CCC_Gamma,		"rs_c_brightness"		,&ps_brightness		);
 	CMD2(CCC_Gamma,		"rs_c_contrast"			,&ps_contrast		);
-//	CMD4(CCC_Integer,	"rs_vb_size",			&rsDVB_Size,		32,		4096);
-//	CMD4(CCC_Integer,	"rs_ib_size",			&rsDIB_Size,		32,		4096);
 
 	// Texture manager	
 	CMD4(CCC_Integer,	"texture_lod",			&psTextureLOD,				0,	4	);

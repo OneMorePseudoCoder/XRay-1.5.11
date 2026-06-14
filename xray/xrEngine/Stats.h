@@ -16,13 +16,14 @@ extern ENGINE_API RP_FUNC rp_Stats;
 class ENGINE_API pureStats
 {
 public:
-	virtual void  OnStats(void)=0;
+	virtual void  OnStats(void) = 0;
 };
 
 class ENGINE_API CStats: public pureRender
 {
 public:
 	CGameFont*	pFont;
+    CGameFont* fpsFont;
 
 	float		fFPS,fRFPS,fTPS		;			// FPS, RenderFPS, TPS
 	float		fMem_calls			;
