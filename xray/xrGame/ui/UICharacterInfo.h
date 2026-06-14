@@ -17,15 +17,14 @@ private:
 	typedef CUIWindow inherited;
 
 protected:
-	void				SetRelation				(ALife::ERelationType relation, CHARACTER_GOODWILL goodwill);
-	void				ResetAllStrings			();
-	void				UpdateRelation			();
-	bool				hasOwner()			{return (m_ownerID!=u16(-1));}
+	void SetRelation(ALife::ERelationType relation, CHARACTER_GOODWILL goodwill);
+	void ResetAllStrings();
+	void UpdateRelation();
+	bool hasOwner() { return (m_ownerID != u16(-1)); }
 	// Biography
-	CUIScrollView*		pUIBio;
-	bool				m_bForceUpdate;
-	u16					m_ownerID;
-
+	CUIScrollView* pUIBio;
+	bool m_bForceUpdate;
+	u16 m_ownerID;
 
 	enum UIItemType
 	{
@@ -51,34 +50,62 @@ protected:
 		
 		eMaxCaption
 	};
-	CUIStatic*			m_icons[eMaxCaption];
-	shared_str			m_texture_name;
-	u32					m_deadbody_color;
+	CUIStatic* m_icons[eMaxCaption];
+	shared_str m_texture_name;
+	u32 m_deadbody_color;
 
 public:
-						CUICharacterInfo();
-	virtual				~CUICharacterInfo();
+			CUICharacterInfo();
+	virtual ~CUICharacterInfo();
 
-	void				InitCharacterInfo		(Fvector2 pos, Fvector2 size, CUIXml* xml_doc);
-	void				InitCharacterInfo		(Fvector2 pos, Fvector2 size, LPCSTR xml_name);
-	void				InitCharacterInfo		(CUIXml* xml_doc, LPCSTR node_str);
-	void				Init_StrInfoItem		(CUIXml& xml_doc, LPCSTR item_str, UIItemType type);
-	void				Init_IconInfoItem		(CUIXml& xml_doc, LPCSTR item_str, UIItemType type);
+	void InitCharacterInfo(Fvector2 pos, Fvector2 size, CUIXml* xml_doc);
+	void InitCharacterInfo(Fvector2 pos, Fvector2 size, LPCSTR xml_name);
+	void InitCharacterInfo(CUIXml* xml_doc, LPCSTR node_str);
+	void Init_StrInfoItem(CUIXml& xml_doc, LPCSTR item_str, UIItemType type);
+	void Init_IconInfoItem(CUIXml& xml_doc, LPCSTR item_str, UIItemType type);
 
-	void				InitCharacter			(u16 id);
-	void				ClearInfo				();
-	void				InitCharacterMP			(LPCSTR player_name, LPCSTR player_icon );
+	void InitCharacter(u16 id);
+	void ClearInfo();
+	void InitCharacterMP(LPCSTR player_name, LPCSTR player_icon);
 
-	virtual void		Update					();
+	virtual void Update();
 
-	u16					OwnerID					()	const	{	return m_ownerID;	}
-	CUIStatic&			UIIcon					()	const	{	VERIFY(m_icons[eIcon]);			return *m_icons[eIcon];	}
-	CUIStatic&			UIName					()	const	{	VERIFY(m_icons[eName]);			return *m_icons[eName];	}
-	CUIStatic&			UICommunity				()	const	{	VERIFY(m_icons[eCommunity]);	return *m_icons[eCommunity];	}
-	CUIStatic&			UICommunityCaption		()	const	{	VERIFY(m_icons[eCommunityCaption]);	return *m_icons[eCommunityCaption];	}
+	u16 OwnerID() const
+	{ 
+		return m_ownerID;	
+	}
 
-	const shared_str&	IconName				()	const	{	return m_texture_name;	}
+	CUIStatic& UIIcon()	const
+	{ 
+		VERIFY(m_icons[eIcon]);
+		return *m_icons[eIcon];	
+	}
 
-	static	bool		get_actor_community		(shared_str* our, shared_str* enemy);
-	static	bool		ignore_community		(shared_str const& check_community);
+	CUIStatic& UIName()	const
+	{ 
+		VERIFY(m_icons[eName]);
+		return *m_icons[eName];	
+	}
+
+	CUIStatic& UICommunity() const
+	{ 
+		VERIFY(m_icons[eCommunity]);
+		return *m_icons[eCommunity];	
+	}
+
+	CUIStatic& UICommunityCaption() const
+	{ 
+		VERIFY(m_icons[eCommunityCaption]);
+		return *m_icons[eCommunityCaption];	
+	}
+
+	const shared_str& IconName() const
+	{	
+		return m_texture_name;
+	}
+
+	void InitMonsterCharacter(shared_str monster_tex_name);
+
+	static bool get_actor_community(shared_str* our, shared_str* enemy);
+	static bool ignore_community(shared_str const& check_community);
 };

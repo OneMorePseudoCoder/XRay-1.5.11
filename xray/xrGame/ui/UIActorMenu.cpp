@@ -25,14 +25,14 @@
 
 void CUIActorMenu::SetActor(CInventoryOwner* io)
 {
-	R_ASSERT			(!IsShown());
-	m_last_time			= Device.dwTimeGlobal;
-	m_pActorInvOwner	= io;
+	R_ASSERT(!IsShown());
+	m_last_time = Device.dwTimeGlobal;
+	m_pActorInvOwner = io;
 	
-	if ( IsGameTypeSingle() )
+	if (IsGameTypeSingle())
 	{
-		if ( io )
-			m_ActorCharacterInfo->InitCharacter	(m_pActorInvOwner->object_id());
+		if (io)
+			m_ActorCharacterInfo->InitCharacter(m_pActorInvOwner->object_id());
 		else
 			m_ActorCharacterInfo->ClearInfo();
 	}
@@ -44,26 +44,25 @@ void CUIActorMenu::SetActor(CInventoryOwner* io)
 
 void CUIActorMenu::SetPartner(CInventoryOwner* io)
 {
-	R_ASSERT			(!IsShown());
-	m_pPartnerInvOwner	= io;
-	if ( m_pPartnerInvOwner )
+	R_ASSERT(!IsShown());
+	m_pPartnerInvOwner = io;
+	if (m_pPartnerInvOwner)
 	{
-		CBaseMonster* monster = smart_cast<CBaseMonster*>( m_pPartnerInvOwner );
-		if ( monster || m_pPartnerInvOwner->use_simplified_visual() ) 
+		CBaseMonster* monster = smart_cast<CBaseMonster*>(m_pPartnerInvOwner);
+		if (monster || m_pPartnerInvOwner->use_simplified_visual()) 
 		{
 			m_PartnerCharacterInfo->ClearInfo();
-			if ( monster )
+			if (monster)
 			{
-				shared_str monster_tex_name = pSettings->r_string( monster->cNameSect(), "icon" );
-				m_PartnerCharacterInfo->UIIcon().InitTexture( monster_tex_name.c_str() );
-				m_PartnerCharacterInfo->UIIcon().SetStretchTexture( true );
+				shared_str monster_tex_name = pSettings->r_string(monster->cNameSect(), "icon");
+				m_PartnerCharacterInfo->InitMonsterCharacter(monster_tex_name);
 			}
 		}
 		else 
 		{
-			m_PartnerCharacterInfo->InitCharacter( m_pPartnerInvOwner->object_id() );
+			m_PartnerCharacterInfo->InitCharacter(m_pPartnerInvOwner->object_id());
 		}
-		SetInvBox( NULL );
+		SetInvBox(NULL);
 	}
 	else
 	{
@@ -73,26 +72,29 @@ void CUIActorMenu::SetPartner(CInventoryOwner* io)
 
 void CUIActorMenu::SetInvBox(CInventoryBox* box)
 {
-	R_ASSERT			(!IsShown());
+	R_ASSERT(!IsShown());
 	m_pInvBox = box;
-	if ( box )
+	if (box)
 	{
 		m_pInvBox->m_in_use = true;
-		SetPartner( NULL );
+		SetPartner(NULL);
 	}
 }
 
 void CUIActorMenu::SetMenuMode(EMenuMode mode)
 {
-	SetCurrentItem( NULL );
-	m_hint_wnd->set_text( NULL );
+	SetCurrentItem(NULL);
+	m_hint_wnd->set_text(NULL);
 	
-	CActor* actor = smart_cast<CActor*>( m_pActorInvOwner );
-	if ( actor )	{	actor->PickupModeOff();	}
+	CActor* actor = smart_cast<CActor*>(m_pActorInvOwner);
+	if (actor)
+	{	
+		actor->PickupModeOff();
+	}
 	
-	if ( mode != m_currMenuMode )
+	if (mode != m_currMenuMode)
 	{
-		switch(m_currMenuMode)
+		switch (m_currMenuMode)
 		{
 		case mmUndefined:
 			break;
@@ -116,7 +118,7 @@ void CUIActorMenu::SetMenuMode(EMenuMode mode)
 		HUD().GetUI()->UIMainIngameWnd->ShowZoneMap(false);
 
 		m_currMenuMode = mode;
-		switch(mode)
+		switch (mode)
 		{
 		case mmUndefined:
 #ifdef DEBUG
@@ -153,42 +155,43 @@ void CUIActorMenu::SetMenuMode(EMenuMode mode)
 			break;
 		}
 		CurModeToScript();
-	}//if
+	}
 
-	if ( m_pActorInvOwner )
+	if (m_pActorInvOwner)
 	{
 		UpdateOutfit();
 		UpdateActor();
 	}
+
 	UpdateButtonsLayout();
 }
 
 void CUIActorMenu::PlaySnd(eActorMenuSndAction a)
 {
 	if (sounds[a]._handle())
-        sounds[a].play					(NULL, sm_2D);
+        sounds[a].play(NULL, sm_2D);
 }
 
 void CUIActorMenu::SendMessage(CUIWindow* pWnd, s16 msg, void* pData)
 {
-	CUIWndCallback::OnEvent		(pWnd, msg, pData);
+	CUIWndCallback::OnEvent(pWnd, msg, pData);
 }
 
 void CUIActorMenu::Show()
 {
-	SetMenuMode							(m_currMenuMode);
-	inherited::Show						();
-	PlaySnd								(eSndOpen);
-	m_ActorStateInfo->Show				(true);
-	m_ActorStateInfo->UpdateActorInfo	(m_pActorInvOwner);
+	SetMenuMode(m_currMenuMode);
+	inherited::Show();
+	PlaySnd(eSndOpen);
+	m_ActorStateInfo->Show(true);
+	m_ActorStateInfo->UpdateActorInfo(m_pActorInvOwner);
 }
 
 void CUIActorMenu::Hide()
 {
-	inherited::Hide						();
-	PlaySnd								(eSndClose);
-	SetMenuMode							(mmUndefined);
-	m_ActorStateInfo->Show				(false);
+	inherited::Hide();
+	PlaySnd(eSndClose);
+	SetMenuMode(mmUndefined);
+	m_ActorStateInfo->Show(false);
 }
 
 void CUIActorMenu::Draw()
@@ -203,24 +206,24 @@ void CUIActorMenu::Update()
 {	
 	{ // all mode
 		m_last_time = Device.dwTimeGlobal;
-		m_ActorStateInfo->UpdateActorInfo( m_pActorInvOwner );
+		m_ActorStateInfo->UpdateActorInfo(m_pActorInvOwner);
 	}
 
-	switch ( m_currMenuMode )
+	switch (m_currMenuMode)
 	{
 	case mmUndefined:
 		break;
 	case mmInventory:
 		{
-			m_clock_value->SetText( InventoryUtilities::GetGameTimeAsString( InventoryUtilities::etpTimeToMinutes ).c_str() );
+			m_clock_value->SetText(InventoryUtilities::GetGameTimeAsString(InventoryUtilities::etpTimeToMinutes ).c_str());
 			HUD().GetUI()->UIMainIngameWnd->UpdateZoneMap();
 			break;
 		}
 	case mmTrade:
 		{
-			if(m_pPartnerInvOwner->inventory().ModifyFrame() != m_trade_partner_inventory_state)
-				InitPartnerInventoryContents	();
-			CheckDistance					();
+			if (m_pPartnerInvOwner->inventory().ModifyFrame() != m_trade_partner_inventory_state)
+				InitPartnerInventoryContents();
+			CheckDistance();
 			break;
 		}
 	case mmUpgrade:
@@ -234,16 +237,19 @@ void CUIActorMenu::Update()
 			CheckDistance();
 			break;
 		}
-	default: R_ASSERT(0); break;
+	default:
+		R_ASSERT(0);
+		break;
 	}
 	
 	inherited::Update();
 	m_ItemInfo->Update();
 	m_hint_wnd->Update();
 }
-bool CUIActorMenu::StopAnyMove()  // true = актёр не идёт при открытом меню
+
+bool CUIActorMenu::StopAnyMove()  // true = пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 {
-	switch ( m_currMenuMode )
+	switch (m_currMenuMode)
 	{
 	case mmInventory:
 		return false;
@@ -258,45 +264,52 @@ bool CUIActorMenu::StopAnyMove()  // true = актёр не идёт при открытом меню
 
 void CUIActorMenu::CheckDistance()
 {
-	CGameObject* pActorGO	= smart_cast<CGameObject*>(m_pActorInvOwner);
-	CGameObject* pPartnerGO	= smart_cast<CGameObject*>(m_pPartnerInvOwner);
-	CGameObject* pBoxGO		= smart_cast<CGameObject*>(m_pInvBox);
-	VERIFY( pActorGO && (pPartnerGO || pBoxGO) );
+	CGameObject* pActorGO = smart_cast<CGameObject*>(m_pActorInvOwner);
+	CGameObject* pPartnerGO = smart_cast<CGameObject*>(m_pPartnerInvOwner);
+	CGameObject* pBoxGO = smart_cast<CGameObject*>(m_pInvBox);
+	VERIFY(pActorGO && (pPartnerGO || pBoxGO));
 
-	if ( pPartnerGO )
+	if (pPartnerGO)
 	{
-		if ( ( pActorGO->Position().distance_to( pPartnerGO->Position() ) > 3.0f ) &&
-			!m_pPartnerInvOwner->NeedOsoznanieMode() )
+		if ((pActorGO->Position().distance_to(pPartnerGO->Position()) > 3.0f) && !m_pPartnerInvOwner->NeedOsoznanieMode())
 		{
-			GetHolder()->StartStopMenu( this, true ); // hide actor menu
+			GetHolder()->StartStopMenu(this, true); // hide actor menu
 		}
 	}
 	else //pBoxGO
 	{
-		VERIFY( pBoxGO );
-		if ( pActorGO->Position().distance_to( pBoxGO->Position() ) > 3.0f )
+		VERIFY(pBoxGO);
+		if (pActorGO->Position().distance_to(pBoxGO->Position()) > 3.0f)
 		{
-			GetHolder()->StartStopMenu( this, true ); // hide actor menu
+			GetHolder()->StartStopMenu(this, true); // hide actor menu
 		}
 	}
 }
 
 EDDListType CUIActorMenu::GetListType(CUIDragDropListEx* l)
 {
-	if(l==m_pInventoryBagList)			return iActorBag;
-	if(l==m_pInventoryBeltList)			return iActorBelt;
-
-	if(l==m_pInventoryAutomaticList)	return iActorSlot;
-	if(l==m_pInventoryPistolList)		return iActorSlot;
-	if(l==m_pInventoryOutfitList)		return iActorSlot;
-	if(l==m_pInventoryDetectorList)		return iActorSlot;
-	
-
-	if(l==m_pTradeActorBagList)			return iActorBag;
-	if(l==m_pTradeActorList)			return iActorTrade;
-	if(l==m_pTradePartnerBagList)		return iPartnerTradeBag;
-	if(l==m_pTradePartnerList)			return iPartnerTrade;
-	if(l==m_pDeadBodyBagList)			return iDeadBodyBag;
+	if (l == m_pInventoryBagList)
+		return iActorBag;
+	if (l == m_pInventoryBeltList)
+		return iActorBelt;
+	if (l == m_pInventoryAutomaticList)
+		return iActorSlot;
+	if (l == m_pInventoryPistolList)
+		return iActorSlot;
+	if (l == m_pInventoryOutfitList)
+		return iActorSlot;
+	if (l == m_pInventoryDetectorList)
+		return iActorSlot;
+	if (l == m_pTradeActorBagList)
+		return iActorBag;
+	if (l == m_pTradeActorList)
+		return iActorTrade;
+	if (l == m_pTradePartnerBagList)
+		return iPartnerTradeBag;
+	if (l == m_pTradePartnerList)
+		return iPartnerTrade;
+	if (l == m_pDeadBodyBagList)
+		return iDeadBodyBag;
 
 	R_ASSERT(0);
 	
@@ -305,19 +318,21 @@ EDDListType CUIActorMenu::GetListType(CUIDragDropListEx* l)
 
 CUIDragDropListEx* CUIActorMenu::GetListByType(EDDListType t)
 {
-	switch(t)
+	switch (t)
 	{
 		case iActorBag:
-			{
-				if(m_currMenuMode==mmTrade)
-					return m_pTradeActorBagList;
-				else
-					return m_pInventoryBagList;
-			}break;
+		{
+			if (m_currMenuMode == mmTrade)
+				return m_pTradeActorBagList;
+			else
+				return m_pInventoryBagList;
+		}
+		break;
 		default:
-			{
-				R_ASSERT("invalid call");
-			}break;
+		{
+			R_ASSERT("invalid call");
+		}
+		break;
 	}
 	return NULL;
 }
@@ -329,59 +344,58 @@ CUICellItem* CUIActorMenu::CurrentItem()
 
 PIItem CUIActorMenu::CurrentIItem()
 {
-	return	(m_pCurrentCellItem)? (PIItem)m_pCurrentCellItem->m_pData : NULL;
+	return (m_pCurrentCellItem) ? (PIItem)m_pCurrentCellItem->m_pData : NULL;
 }
 
 void CUIActorMenu::SetCurrentItem(CUICellItem* itm)
 {
 	m_repair_mode = false;
 	m_pCurrentCellItem = itm;
-	if ( !itm )
+	if (!itm)
 	{
-		InfoCurItem( NULL );
+		InfoCurItem(NULL);
 	}
+
 	TryHidePropertiesBox();
 
-	if ( m_currMenuMode == mmUpgrade )
+	if (m_currMenuMode == mmUpgrade)
 	{
 		SetupUpgradeItem();
 	}
 }
 
-// ================================================================
-
-void CUIActorMenu::InfoCurItem( CUICellItem* cell_item )
+void CUIActorMenu::InfoCurItem(CUICellItem* cell_item)
 {
-	if ( !cell_item )
+	if (!cell_item)
 	{
-		m_ItemInfo->InitItem( NULL );
+		m_ItemInfo->InitItem(NULL);
 		return;
 	}
-	PIItem current_item = (PIItem)cell_item->m_pData;
 
+	PIItem current_item = (PIItem)cell_item->m_pData;
 	PIItem compare_item = NULL;
-	u32    compare_slot = current_item->GetSlot();
-	if ( compare_slot != NO_ACTIVE_SLOT )
+	u32 compare_slot = current_item->GetSlot();
+	if (compare_slot != NO_ACTIVE_SLOT)
 	{
 		compare_item = m_pActorInvOwner->inventory().m_slots[compare_slot].m_pIItem;
 	}
 	
-	m_ItemInfo->InitItem	( current_item, compare_item );
+	m_ItemInfo->InitItem(current_item, compare_item);
 	float dx_pos = GetWndRect().left;
-	m_ItemInfo->AlignHintWndPos( Frect().set( 0.0f, 0.0f, 1024.0f - dx_pos, 768.0f ), 10.0f, dx_pos );
+	m_ItemInfo->AlignHintWndPos(Frect().set(0.0f, 0.0f, 1024.0f - dx_pos, 768.0f), 10.0f, dx_pos);
 }
 
 bool CUIActorMenu::OnItemStartDrag(CUICellItem* itm)
 {
-	InfoCurItem( NULL );
+	InfoCurItem(NULL);
 	return false; //default behaviour
 }
 
 bool CUIActorMenu::OnItemSelected(CUICellItem* itm)
 {
-	SetCurrentItem		(itm);
-	InfoCurItem			(NULL);
-	return				false;
+	SetCurrentItem(itm);
+	InfoCurItem(NULL);
+	return false;
 }
 
 bool CUIActorMenu::OnItemDrop(CUICellItem* itm)
@@ -525,12 +539,11 @@ bool CUIActorMenu::OnItemDbClick(CUICellItem* itm)
 
 void CUIActorMenu::UpdateItemsPlace()
 {
-	switch ( m_currMenuMode )
+	switch (m_currMenuMode)
 	{
 	case mmUndefined:
 		break;
 	case mmInventory:
-		
 		break;
 	case mmTrade:
 		UpdatePrices();
@@ -546,7 +559,7 @@ void CUIActorMenu::UpdateItemsPlace()
 		break;
 	}
 
-	if ( m_pActorInvOwner )
+	if (m_pActorInvOwner)
 	{
 		UpdateOutfit();
 		UpdateActor();
@@ -555,132 +568,132 @@ void CUIActorMenu::UpdateItemsPlace()
 
 bool CUIActorMenu::OnItemRButtonClick(CUICellItem* itm)
 {
-	SetCurrentItem( itm );
-	InfoCurItem( NULL );
+	SetCurrentItem(itm);
+	InfoCurItem(NULL);
 	ActivatePropertiesBox();
 	return false;
 }
 
 bool CUIActorMenu::OnItemFocusReceive(CUICellItem* itm)
 {
-	InfoCurItem( NULL );
+	InfoCurItem(NULL);
 	return true;
 }
 
 bool CUIActorMenu::OnItemFocusLost(CUICellItem* itm)
 {
-	if ( itm )
+	if (itm)
 	{
 		itm->m_selected = false;
 	}
-	InfoCurItem( NULL );
+	InfoCurItem(NULL);
 	return true;
 }
 
 bool CUIActorMenu::OnItemFocusedUpdate(CUICellItem* itm)
 {
-	if ( itm )
+	if (itm)
 	{
 		itm->m_selected = true;
 	}
-	VERIFY( m_ItemInfo );
-	if ( Device.dwTimeGlobal < itm->FocusReceiveTime() + m_ItemInfo->delay )
+
+	VERIFY(m_ItemInfo);
+
+	if (Device.dwTimeGlobal < itm->FocusReceiveTime() + m_ItemInfo->delay)
 	{
-		return true; //false
+		return true;
 	}
-	if ( CUIDragDropListEx::m_drag_item || m_UIPropertiesBox->IsShown() )
+
+	if (CUIDragDropListEx::m_drag_item || m_UIPropertiesBox->IsShown())
 	{
 		return true;
 	}	
 	
-	InfoCurItem( itm );
+	InfoCurItem(itm);
 	return true;
 }
 
 void CUIActorMenu::ClearAllLists()
 {
-	m_pInventoryBagList->ClearAll				(true);
+	m_pInventoryBagList->ClearAll(true);
 	
-	m_pInventoryBeltList->ClearAll				(true);
-	m_pInventoryOutfitList->ClearAll			(true);
-	m_pInventoryDetectorList->ClearAll			(true);
-	m_pInventoryPistolList->ClearAll			(true);
-	m_pInventoryAutomaticList->ClearAll			(true);
+	m_pInventoryBeltList->ClearAll(true);
+	m_pInventoryOutfitList->ClearAll(true);
+	m_pInventoryDetectorList->ClearAll(true);
+	m_pInventoryPistolList->ClearAll(true);
+	m_pInventoryAutomaticList->ClearAll(true);
 
-	m_pTradeActorBagList->ClearAll				(true);
-	m_pTradeActorList->ClearAll					(true);
-	m_pTradePartnerBagList->ClearAll			(true);
-	m_pTradePartnerList->ClearAll				(true);
-	m_pDeadBodyBagList->ClearAll				(true);
+	m_pTradeActorBagList->ClearAll(true);
+	m_pTradeActorList->ClearAll(true);
+	m_pTradePartnerBagList->ClearAll(true);
+	m_pTradePartnerList->ClearAll(true);
+	m_pDeadBodyBagList->ClearAll(true);
 }
 
-bool CUIActorMenu::OnMouse( float x, float y, EUIMessages mouse_action )
+bool CUIActorMenu::OnMouse(float x, float y, EUIMessages mouse_action)
 {
-	inherited::OnMouse( x, y, mouse_action );
+	inherited::OnMouse(x, y, mouse_action);
 	return true; // no click`s
 }
 
 void CUIActorMenu::OnMouseMove()
 {
-	//SetInfoItem( NULL );
-	inherited::OnMouseMove		();
+	inherited::OnMouseMove();
 }
 
 bool CUIActorMenu::OnKeyboard(int dik, EUIMessages keyboard_action)
 {
-/*
-	if (UIPropertiesBox.GetVisible())
-	{	UIPropertiesBox.OnKeyboard(dik, keyboard_action); }
-*/
-	InfoCurItem( NULL );
-	if ( is_binded(kDROP, dik) )
+	InfoCurItem(NULL);
+	if (is_binded(kDROP, dik))
 	{
-		if ( WINDOW_KEY_PRESSED == keyboard_action && CurrentIItem() && !CurrentIItem()->IsQuestItem() )
+		if (WINDOW_KEY_PRESSED == keyboard_action && CurrentIItem() && !CurrentIItem()->IsQuestItem())
 		{
-
-			SendEvent_Item_Drop		(CurrentIItem(), m_pActorInvOwner->object_id());
-			SetCurrentItem			(NULL);
+			SendEvent_Item_Drop(CurrentIItem(), m_pActorInvOwner->object_id());
+			SetCurrentItem(NULL);
 		}
 		return true;
 	}
 	
-	if ( is_binded(kSPRINT_TOGGLE, dik) )
+	if (is_binded(kSPRINT_TOGGLE, dik))
 	{
-		if ( WINDOW_KEY_PRESSED == keyboard_action )
+		if (WINDOW_KEY_PRESSED == keyboard_action)
 		{
 			OnPressUserKey();
 		}
 		return true;
 	}	
 	
-	if ( is_binded(kUSE, dik) )
+	if (is_binded(kUSE, dik))
 	{
-		if ( WINDOW_KEY_PRESSED == keyboard_action )
+		if (WINDOW_KEY_PRESSED == keyboard_action)
 		{
-			GetHolder()->StartStopMenu( this, true );
+			GetHolder()->StartStopMenu(this, true);
 		}
 		return true;
 	}	
 
-	if( inherited::OnKeyboard(dik,keyboard_action) )return true;
+	if (inherited::OnKeyboard(dik, keyboard_action))
+		return true;
 
 	return false;
 }
 
 void CUIActorMenu::OnPressUserKey()
 {
-	switch ( m_currMenuMode )
+	switch (m_currMenuMode)
 	{
-	case mmUndefined:		break;
-	case mmInventory:		break;
+	case mmUndefined:
+		break;
+	case mmInventory:
+		break;
 	case mmTrade:			
-		OnBtnPerformTrade( this, 0 );
+		OnBtnPerformTrade(this, 0);
 		break;
 	case mmUpgrade:			
 		TrySetCurUpgrade();
 		break;
 	case mmDeadBodySearch:	
-		TakeAllFromPartner( this, 0 );
+		TakeAllFromPartner(this, 0);
 		break;
 	default:
 		R_ASSERT(0);
@@ -693,25 +706,25 @@ bool  CUIActorMenu::AllowItemDrops(EDDListType from, EDDListType to)
 	xr_vector<EDDListType>& v = m_allowed_drops[to];
 	xr_vector<EDDListType>::iterator it = std::find(v.begin(), v.end(), from);
 	
-	return(it!=v.end());
+	return (it != v.end());
 }
 
-void CUIActorMenu::CallMessageBoxYesNo( LPCSTR text )
+void CUIActorMenu::CallMessageBoxYesNo(LPCSTR text)
 {
-	m_message_box_yes_no->SetText( text );
-	m_message_box_yes_no->func_on_ok = CUIWndCallback::void_function( this, &CUIActorMenu::OnMesBoxYes );
-	HUD().GetUI()->StartStopMenu( m_message_box_yes_no, false );
+	m_message_box_yes_no->SetText(text);
+	m_message_box_yes_no->func_on_ok = CUIWndCallback::void_function(this, &CUIActorMenu::OnMesBoxYes);
+	HUD().GetUI()->StartStopMenu(m_message_box_yes_no, false);
 }
 
-void CUIActorMenu::CallMessageBoxOK( LPCSTR text )
+void CUIActorMenu::CallMessageBoxOK(LPCSTR text)
 {
-	m_message_box_ok->SetText( text );
-	HUD().GetUI()->StartStopMenu( m_message_box_ok, false );
+	m_message_box_ok->SetText(text);
+	HUD().GetUI()->StartStopMenu(m_message_box_ok, false);
 }
 
-void CUIActorMenu::OnMesBoxYes( CUIWindow*, void* )
+void CUIActorMenu::OnMesBoxYes(CUIWindow*, void*)
 {
-	switch( m_currMenuMode )
+	switch (m_currMenuMode)
 	{
 	case mmUndefined:
 		break;
@@ -720,7 +733,7 @@ void CUIActorMenu::OnMesBoxYes( CUIWindow*, void* )
 	case mmTrade:
 		break;
 	case mmUpgrade:
-		if ( m_repair_mode )
+		if (m_repair_mode)
 		{
 			RepairEffect_CurItem();
 			m_repair_mode = false;
@@ -741,32 +754,31 @@ void CUIActorMenu::OnMesBoxYes( CUIWindow*, void* )
 
 void CUIActorMenu::OnBtnExitClicked(CUIWindow* w, void* d)
 {
-	GetHolder()->StartStopMenu			(this,true);
+	GetHolder()->StartStopMenu(this, true);
 }
 
 void CUIActorMenu::ResetMode()
 {
-	ClearAllLists				();
-	m_pMouseCapturer			= NULL;
-	m_UIPropertiesBox->Hide		();
-	SetCurrentItem				(NULL);
+	ClearAllLists();
+	m_pMouseCapturer = NULL;
+	m_UIPropertiesBox->Hide();
+	SetCurrentItem(NULL);
 }
 
 void CUIActorMenu::UpdateActorMP()
 {
-	if ( !Level().game || !Game().local_player || !m_pActorInvOwner || IsGameTypeSingle() )
+	if (!Level().game || !Game().local_player || !m_pActorInvOwner || IsGameTypeSingle())
 	{
 		m_ActorCharacterInfo->ClearInfo();
-		m_ActorMoney->SetText( "" );
+		m_ActorMoney->SetText("");
 		return;
 	}
 
 	int money = Game().local_player->money_for_round;
 
 	string64 buf;
-	sprintf_s( buf, "%d RU", money );
-	m_ActorMoney->SetText( buf );
+	sprintf_s(buf, "%d RU", money);
+	m_ActorMoney->SetText(buf);
 
-	m_ActorCharacterInfo->InitCharacterMP( Game().local_player->name, "ui_npc_u_nebo_1" );
-
+	m_ActorCharacterInfo->InitCharacterMP(Game().local_player->name, "ui_npc_u_nebo_1");
 }
